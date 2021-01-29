@@ -187,6 +187,11 @@ class Calculator:
             lines += self._format_item_list(self.additional_items)
         return "\n".join(lines)
 
+help_msg="""Usage:
+ls, list     : Show all available items
+?, help      : Print this help
+exit, CTRL-D : Exit the program
+"""
 
 def main():
     global item_lookup
@@ -213,6 +218,16 @@ def main():
 
         if item_spec == "exit" or item_spec == "":
             break
+
+        if item_spec == "ls" or item_spec == "list":
+            print("\n".join(item_lookup.item_to_name))
+            print()
+            continue
+
+        if item_spec == "?" or item_spec == "help":
+            print(help_msg)
+            print()
+            continue
 
         try:
             item_amounts = [ItemAmount.resolve(*parse_item_amount(token)) for token in item_spec.split('+')]
