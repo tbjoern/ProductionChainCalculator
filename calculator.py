@@ -83,7 +83,7 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]
             item_names.append(item_name)
 
             try:
-                time = int(time)
+                time = float(time)
             except ValueError:
                 parser.error(f"Parse error in {filename}:{i} - Failed to parse time, {time} is not an int")
 
