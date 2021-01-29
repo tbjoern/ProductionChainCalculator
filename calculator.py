@@ -54,6 +54,11 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]
     raw_recipes = []
     with open(filename, 'r') as fp:
         for i, line in enumerate(fp):
+            line = line.strip()
+            if len(line) == 0:
+                continue
+            if line[0] == '#':
+                continue
             tokens = line.split(';')
             if len(tokens) < 3:
                 parser.error(f"Parse error in {filename}:{i} - Too few entries")
