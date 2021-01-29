@@ -1,13 +1,23 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.INFO)
 
 Item = int
 
+
 @dataclass
-class Ingredient:
+class ItemAmount:
     amount: int
     item: Item
+
+    def __repr__(self):
+        global item_lookup
+        item_name = item_lookup.name_for(self.item)
+        return f"ItemAmount(amount={self.amount}, item={item_name})"
 
 @dataclass
 class ItemLookup:
@@ -24,17 +34,22 @@ class ItemLookup:
         return self.name_to_item[name]
 
     def name_for(self, item):
+        if item >= len(self.item_to_name):
+            logger.warning(f"Could not find name for item {item}")
+            return str(item)
         return self.item_to_name[item]
+
+item_lookup = ItemLookup({}, [])
 
 @dataclass
 class Recipe:
-    item: Item
-    ingredients: List[Ingredient]
+    result: ItemAmount
+    ingredients: List[ItemAmount]
     time: int
     factory: Item
 
 
-def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, List[Recipe]]:
+def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]]:
     item_names = []
     raw_recipes = []
     with open(filename, 'r') as fp:
@@ -42,11 +57,26 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, List[Recipe]]:
             tokens = line.split(';')
             if len(tokens) < 3:
                 parser.error(f"Parse error in {filename}:{i} - Too few entries")
-            item_name, time, factory, *ingredient_tokens = tokens
+            item_token, time, factory, *ingredient_tokens = tokens
+
+            item_token = item_token.split(',')
+            if len(item_token) == 1:
+                item_amount = 1
+                item_name = item_token[0]
+            elif len(item_token) == 2:
+                item_amount, item_name = item_token
+                try:
+                    item_amount = int(item_amount)
+                except ValueError:
+                    parser.error(f"Parse error in {filename}:{i} - Item amount is not an int")
+            else:
+                parser.error(f"Parse error in {filename}:{i} - Item needs amount and name: {item_token}")
+
             item_name = item_name.strip()
-            factory = factory.strip()
             if len(item_name) == 0:
                 parser.error(f"Parse error in {filename}:{i} - Item name is empty")
+
+            factory = factory.strip()
             if len(factory) == 0:
                 parser.error(f"Parse error in {filename}:{i} - Factory name is empty")
 
@@ -60,35 +90,42 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, List[Recipe]]:
             ingredients = []
             for itoken in ingredient_tokens:
                 itoken_split = itoken.split(',')
-                if len(itoken_split) != 2:
+
+                if len(itoken_split) == 1:
+                    amount = 1
+                    ingredient_item = itoken_split[0]
+                elif len(itoken_split) == 2:
+                    amount, ingredient_item =  itoken_split
+                    try:
+                        amount = int(amount)
+                    except ValueError:
+                        parser.error(f"Parse error in {filename}:{i} - Failed to parse ingredient {itoken}, amount {amount} is not an int")
+                else:
                     parser.error(f"Parse error in {filename}:{i} - Failed to parse ingredient {itoken}")
-                amount, ingredient_item =  itoken_split
+
                 ingredient_item = ingredient_item.strip()
-                try:
-                    amount = int(amount)
-                except ValueError:
-                    parser.error(f"Parse error in {filename}:{i} - Failed to parse ingredient {itoken}, amount {amount} is not an int")
                 if len(ingredient_item) == 0:
                     parser.error(f"Parse error in {filename}:{i} - Failed to parse ingredient {itoken}, item {ingredient_item} is empty")
                 ingredients.append((amount, ingredient_item))
 
-            raw_recipes.append((item_name, ingredients, time, factory))
+            raw_recipes.append(((item_amount, item_name), ingredients, time, factory))
     
     item_lookup = ItemLookup.from_name_list(item_names)
     
-    recipes = []
-    for item_name, raw_ingredients, time, factory in raw_recipes:
+    recipes = {}
+    for (item_amount, item_name), raw_ingredients, time, factory in raw_recipes:
         item = item_lookup.item_for(item_name)
         ingredients = []
         for amount, ingredient_item_name in raw_ingredients:
            ingredient_item = item_lookup.item_for(ingredient_item_name)
-           ingredients.append(Ingredient(amount, ingredient_item))
-        recipes.append(Recipe(item, ingredients, time, factory))
+           ingredients.append(ItemAmount(amount, ingredient_item))
+        recipes[item] = Recipe(ItemAmount(item_amount, item), ingredients, time, factory)
 
     return item_lookup, recipes
 
 
 def main():
+    global item_lookup
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -100,7 +137,10 @@ def main():
     if not args.recipes.is_file():
         parser.error(f"{args.recipes} is not a file")
 
-    print(load_recipes(args.recipes, parser))
+    item_lookup, recipes = load_recipes(args.recipes, parser)
+
+    print(item_lookup)
+    print(recipes)
 
 
 if __name__ == "__main__":
