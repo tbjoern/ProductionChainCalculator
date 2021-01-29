@@ -44,6 +44,8 @@ turbine;2;assembler;2,motor;2,magneticcoil
 supermagneticring;3;assembler;2,turbine;3,magnet;graphite
 titaniumcrystal;4;assembler;organiccrystal;3,titaniumingot
 photoncombiner;3;assembler;2,prism;circuitboard
+particlecontainer;4;assembler;2,turbine;2,copperingot;2,graphene
+4,titaniumalloy;12;smelter;4,titaniumingot;4,steel;8,sulfuricacid
 
 # products
 2,solarsail;4;assembler;graphene;photoncombiner
