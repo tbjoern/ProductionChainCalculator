@@ -127,6 +127,8 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]
            ingredients.append(ItemAmount(amount, ingredient_item))
         recipes[item] = Recipe(ItemAmount(item_amount, item), ingredients, time, factory)
 
+    print(f"Sucessfully loaded {filename.name}")
+
     return item_lookup, recipes
 
 class Calculator:
@@ -155,7 +157,7 @@ class Calculator:
                 factory = recipe.factory
                 items_per_second_per_factory = recipe.result.amount / recipe.time
                 factories_needed = math.ceil(amount / items_per_second_per_factory)
-                lines.append(f"{self.item_lookup.name_for(item)}: {amount}/s - {factories_needed} {factory}")
+                lines.append(f"{self.item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3} {factory}")
         return "\n".join(lines)
 
 
@@ -174,15 +176,12 @@ def main():
 
     item_lookup, recipes = load_recipes(args.recipes, parser)
 
-    print(item_lookup)
-    print(recipes)
-
     calculator = Calculator(item_lookup, recipes)
     
     while True:
         try:
-            item_to_produce = input("What should be produced: ")
-            item_amount = input("How many: ")
+            item_to_produce = input("Item: ")
+            item_amount = input("Production (items/second): ")
         except EOFError:
             break
 
@@ -193,7 +192,7 @@ def main():
 
         item = item_lookup.item_for(item_to_produce.strip())
         if item is None:
-            print(f"Could not find {item}, choose one of")
+            print(f"Could not find {item}, choose one of:")
             print("\n".join(item_lookup.item_to_name))
             continue
 
@@ -206,6 +205,7 @@ def main():
         calculator.make_item(item, item_amount)
         print(str(calculator))
         calculator.reset()
+        print()
 
 
 if __name__ == "__main__":
