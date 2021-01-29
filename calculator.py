@@ -9,6 +9,8 @@ logger.setLevel(level=logging.INFO)
 
 Item = int
 
+class ParseError(ValueError):
+    pass
 
 @dataclass
 class ItemAmount:
@@ -60,7 +62,7 @@ class Recipe:
                 return result.amount
         return None
 
-def parse_item_amount(item_token, filename, i, parser):
+def parse_item_amount(item_token):
     item_token = item_token.split(',')
     if len(item_token) == 1:
         item_amount = 1
@@ -70,13 +72,13 @@ def parse_item_amount(item_token, filename, i, parser):
         try:
             item_amount = int(item_amount)
         except ValueError:
-            parser.error(f"Parse error in {filename}:{i} - Item amount is not an int - {item_token}")
+            raise ParseError(f"Item amount is not an int - {item_token}")
     else:
-        parser.error(f"Parse error in {filename}:{i} - Item needs amount and name - {item_token}")
+        raise ParseError(f"Item needs amount and name - {item_token}")
 
     item_name = item_name.strip().lower()
     if len(item_name) == 0:
-        parser.error(f"Parse error in {filename}:{i} - Item name is empty")
+        raise ParseError(f"Item name is empty - {item_token}")
 
     return (item_amount, item_name)
 
@@ -85,33 +87,37 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]
     item_names = set()
     raw_recipes = []
     with open(filename, 'r') as fp:
-        for i, line in enumerate(fp):
-            line = line.strip()
-            if len(line) == 0:
-                continue
-            if line[0] == '#':
-                continue
-            tokens = line.split(';')
-            if len(tokens) < 3:
-                parser.error(f"Parse error in {filename}:{i} - Too few entries")
-            result_tokens, time, factory, *ingredient_tokens = tokens
+        try:
+            for i, line in enumerate(fp):
+                line = line.strip()
+                if len(line) == 0:
+                    continue
+                if line[0] == '#':
+                    continue
+                tokens = line.split(';')
+                if len(tokens) < 3:
+                    raise ParseError("Too few entries in line - {line}")
+                result_tokens, time, factory, *ingredient_tokens = tokens
 
-            results = [parse_item_amount(token, filename, i, parser) for token in result_tokens.split('+')]
-            for amount, item_name in results:
-                item_names.add(item_name)
+                results = [parse_item_amount(token) for token in result_tokens.split('+')]
 
-            try:
-                time = float(time)
-            except ValueError:
-                parser.error(f"Parse error in {filename}:{i} - Failed to parse time, {time} is not an int")
+                for amount, item_name in results:
+                    item_names.add(item_name)
 
-            factory = factory.strip()
-            if len(factory) == 0:
-                parser.error(f"Parse error in {filename}:{i} - Factory name is empty")
+                try:
+                    time = float(time)
+                except ValueError:
+                    raise ParseError(f"Failed to parse time, {time} is not an int")
 
-            ingredients = [parse_item_amount(token, filename, i, parser) for token in ingredient_tokens]
+                factory = factory.strip()
+                if len(factory) == 0:
+                    raise ParseError(f"Factory name is empty")
 
-            raw_recipes.append((results, ingredients, time, factory))
+                ingredients = [parse_item_amount(token) for token in ingredient_tokens]
+
+                raw_recipes.append((results, ingredients, time, factory))
+        except ParseError as e:
+            parser.error("Parse error in {filename}:{i} - {e}")
     
     item_lookup = ItemLookup.from_name_list(item_names)
     
@@ -201,29 +207,22 @@ def main():
     
     while True:
         try:
-            item_to_produce = input("Item: ")
-            item_amount = input("Production (items/second): ")
+            item_spec = input("Items to produce/s (amount,item + ...): ")
         except EOFError:
             break
 
-        item_to_produce = item_to_produce.strip().lower()
-
-        if item_to_produce == "exit" or item_to_produce == "":
+        if item_spec == "exit" or item_spec == "":
             break
 
-        item = item_lookup.item_for(item_to_produce.strip())
-        if item is None:
-            print(f"Could not find {item}, choose one of:")
-            print("\n".join(item_lookup.item_to_name))
-            continue
-
         try:
-            item_amount = int(item_amount)
-        except ValueError:
-            print(f"Is not a number: {item_amount}")
+            item_amounts = [ItemAmount.resolve(*parse_item_amount(token)) for token in item_spec.split('+')]
+        except ParseError as e:
+            print("Invalid item format")
+            print(e)
             continue
 
-        calculator.make_item(item, item_amount)
+        for item_amount in item_amounts:
+            calculator.make_item(item_amount.item, item_amount.amount)
         print(str(calculator))
         calculator.reset()
         print()
