@@ -18,9 +18,7 @@ titaniumingot;2;smelter;2,titaniumore
 magnet;1.5;smelter;ironore
 
 # chemistry
-2,refinedoil;4;refinery;2,oil
-# TODO merge these into one recipe
-1,hydrogen;4;refinery;2,oil
+1,hydrogen+2,refinedoil;4;refinery;2,oil
 4,sulfuricacid;6;chemicalplant;4,refinedoil;8,stoneore;4,water
 plastic;3;chemicalplant;2,refinedoil;graphite
 2,graphene;3;chemicalplant;3,graphite;sulfuricacid
