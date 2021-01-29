@@ -144,9 +144,9 @@ class Calculator:
         return [0 for _ in range(len(self.item_lookup.item_to_name))]
 
     def make_item(self, item, amount):
+        self.item_tracker[item] += amount
         amount = amount - self.additional_items[item] 
         self.additional_items[item] = max(0, -amount)
-        self.item_tracker[item] += amount
 
         if amount < 0:
             return
