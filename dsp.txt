@@ -1,10 +1,10 @@
 # raw resources
-ironore; 2; extractor
-copperore; 2; extractor
-stoneore;2;extractor
-coal;2;extractor
-siliconore;2;extractor
-titaniumore;2;extractor
+ironore; 2; ironvein
+copperore; 2; coppervein
+stoneore;2; stonevein
+coal;2; coalvein
+siliconore;2; siliconvein
+titaniumore;2; titaniumvein
 oil;1;oilwell
 water;2;waterpump
 
