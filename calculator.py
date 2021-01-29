@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Sequence
 import logging
 import math
 
@@ -20,14 +20,19 @@ class ItemAmount:
         item_name = item_lookup.name_for(self.item)
         return f"ItemAmount(amount={self.amount}, item={item_name})"
 
+    @classmethod
+    def resolve(cls, amount, name):
+        item = item_lookup.item_for(name)
+        return cls(amount, item)
+
 @dataclass
 class ItemLookup:
     name_to_item: Dict[str, Item]
     item_to_name: List[str]
 
     @classmethod
-    def from_name_list(cls, name_list: List[str]) -> "ItemLookup":
-        sorted_names = sorted(name_list)
+    def from_name_list(cls, name_list: Sequence[str]) -> "ItemLookup":
+        sorted_names = sorted(list(name_list))
         name_to_item = {name:i for i,name in enumerate(sorted_names)}
         return cls(name_to_item, sorted_names)
 
@@ -44,14 +49,40 @@ item_lookup = ItemLookup({}, [])
 
 @dataclass
 class Recipe:
-    result: ItemAmount
+    results: List[ItemAmount]
     ingredients: List[ItemAmount]
     time: int
     factory: Item
 
+    def get_amount(self, item) -> int:
+        for result in self.results:
+            if item == result.item:
+                return result.amount
+        return None
+
+def parse_item_amount(item_token, filename, i, parser):
+    item_token = item_token.split(',')
+    if len(item_token) == 1:
+        item_amount = 1
+        item_name = item_token[0]
+    elif len(item_token) == 2:
+        item_amount, item_name = item_token
+        try:
+            item_amount = int(item_amount)
+        except ValueError:
+            parser.error(f"Parse error in {filename}:{i} - Item amount is not an int - {item_token}")
+    else:
+        parser.error(f"Parse error in {filename}:{i} - Item needs amount and name - {item_token}")
+
+    item_name = item_name.strip().lower()
+    if len(item_name) == 0:
+        parser.error(f"Parse error in {filename}:{i} - Item name is empty")
+
+    return (item_amount, item_name)
 
 def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]]:
-    item_names = []
+    global item_lookup
+    item_names = set()
     raw_recipes = []
     with open(filename, 'r') as fp:
         for i, line in enumerate(fp):
@@ -63,69 +94,33 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]
             tokens = line.split(';')
             if len(tokens) < 3:
                 parser.error(f"Parse error in {filename}:{i} - Too few entries")
-            item_token, time, factory, *ingredient_tokens = tokens
+            result_tokens, time, factory, *ingredient_tokens = tokens
 
-            item_token = item_token.split(',')
-            if len(item_token) == 1:
-                item_amount = 1
-                item_name = item_token[0]
-            elif len(item_token) == 2:
-                item_amount, item_name = item_token
-                try:
-                    item_amount = int(item_amount)
-                except ValueError:
-                    parser.error(f"Parse error in {filename}:{i} - Item amount is not an int")
-            else:
-                parser.error(f"Parse error in {filename}:{i} - Item needs amount and name: {item_token}")
-
-            item_name = item_name.strip().lower()
-            if len(item_name) == 0:
-                parser.error(f"Parse error in {filename}:{i} - Item name is empty")
-
-            factory = factory.strip()
-            if len(factory) == 0:
-                parser.error(f"Parse error in {filename}:{i} - Factory name is empty")
-
-            item_names.append(item_name)
+            results = [parse_item_amount(token, filename, i, parser) for token in result_tokens.split('+')]
+            for amount, item_name in results:
+                item_names.add(item_name)
 
             try:
                 time = float(time)
             except ValueError:
                 parser.error(f"Parse error in {filename}:{i} - Failed to parse time, {time} is not an int")
 
-            ingredients = []
-            for itoken in ingredient_tokens:
-                itoken_split = itoken.split(',')
+            factory = factory.strip()
+            if len(factory) == 0:
+                parser.error(f"Parse error in {filename}:{i} - Factory name is empty")
 
-                if len(itoken_split) == 1:
-                    amount = 1
-                    ingredient_item = itoken_split[0]
-                elif len(itoken_split) == 2:
-                    amount, ingredient_item =  itoken_split
-                    try:
-                        amount = int(amount)
-                    except ValueError:
-                        parser.error(f"Parse error in {filename}:{i} - Failed to parse ingredient {itoken}, amount {amount} is not an int")
-                else:
-                    parser.error(f"Parse error in {filename}:{i} - Failed to parse ingredient {itoken}")
+            ingredients = [parse_item_amount(token, filename, i, parser) for token in ingredient_tokens]
 
-                ingredient_item = ingredient_item.strip().lower()
-                if len(ingredient_item) == 0:
-                    parser.error(f"Parse error in {filename}:{i} - Failed to parse ingredient {itoken}, item {ingredient_item} is empty")
-                ingredients.append((amount, ingredient_item))
-
-            raw_recipes.append(((item_amount, item_name), ingredients, time, factory))
+            raw_recipes.append((results, ingredients, time, factory))
     
     item_lookup = ItemLookup.from_name_list(item_names)
     
     recipes = {}
-    for (item_amount, item_name), raw_ingredients, time, factory in raw_recipes:
-        item = item_lookup.item_for(item_name)
-        ingredients = []
-        for amount, ingredient_item_name in raw_ingredients:
-           ingredient_item = item_lookup.item_for(ingredient_item_name)
-           ingredients.append(ItemAmount(amount, ingredient_item))
-        recipes[item] = Recipe(ItemAmount(item_amount, item), ingredients, time, factory)
+    for raw_results, raw_ingredients, time, factory in raw_recipes:
+        ingredients = [ItemAmount.resolve(*r) for r in raw_ingredients]
+        results = [ItemAmount.resolve(*r) for r in raw_results]
+        for result in results:
+            recipes[result.item] = Recipe(results, ingredients, time, factory)
 
     print(f"Sucessfully loaded {filename.name}")
 
@@ -135,29 +130,55 @@ class Calculator:
     def __init__(self, item_lookup, recipes):
         self.item_lookup = item_lookup
         self.recipes = recipes
-        self.item_tracker = [0 for _ in range(len(item_lookup.item_to_name))]
+        self.item_tracker = None
+        self.additional_items = None
+        self.reset()
+
+    def _make_item_list(self):
+        return [0 for _ in range(len(self.item_lookup.item_to_name))]
 
     def make_item(self, item, amount):
+        amount = amount - self.additional_items[item] 
+        self.additional_items[item] = max(0, -amount)
         self.item_tracker[item] += amount
 
+        if amount < 0:
+            return
+
         recipe = self.recipes[item]
-        recipe_yield = recipe.result.amount
+        recipe_yield = recipe.get_amount(item)
+        assert recipe_yield is not None
+
         times_recipe_needed = float(amount) / recipe_yield
         for ingredient in recipe.ingredients:
             self.make_item(ingredient.item, ingredient.amount * times_recipe_needed)
 
-    def reset(self):
-        self.item_tracker = [0 for _ in range(len(item_lookup.item_to_name))]
+        for result in recipe.results:
+            if item != result.item:
+                self.additional_items[result.item] += times_recipe_needed * result.amount
 
-    def __str__(self):
+    def reset(self):
+        self.item_tracker = self._make_item_list()
+        self.additional_items = self._make_item_list()
+
+    def _format_item_list(self, item_list) -> List[str]:
         lines = []
-        for item, amount in enumerate(self.item_tracker):
+        for item, amount in enumerate(item_list):
             if amount > 0:
                 recipe = self.recipes[item]
                 factory = recipe.factory
-                items_per_second_per_factory = recipe.result.amount / recipe.time
+                items_per_second_per_factory = recipe.get_amount(item) / recipe.time
                 factories_needed = math.ceil(amount / items_per_second_per_factory)
                 lines.append(f"{self.item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3} {factory}")
+        return lines
+
+    def __str__(self):
+        lines = []
+        lines.append("Required products:")
+        lines += self._format_item_list(self.item_tracker)
+        if any(self.additional_items):
+            lines.append("Additional products:")
+            lines += self._format_item_list(self.additional_items)
         return "\n".join(lines)
 
 
