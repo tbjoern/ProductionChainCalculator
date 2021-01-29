@@ -1,0 +1,56 @@
+# raw resources
+ironore; 2; extractor
+copperore; 2; extractor
+stoneore;2;extractor
+coal;2;extractor
+siliconore;2;extractor
+titaniumore;2;extractor
+oil;2;oilwell
+water;2;waterpump
+
+# plates and direct smelts
+ironingot; 1; smelter;ironore
+copperingot; 1; smelter;copperore
+stone;1;smelter;stoneore
+graphite;2;smelter;2,coal
+siliconingot;2;smelter;2,siliconore
+titaniumingot;2;smelter;2,titaniumore
+magnet;1.5;smelter;ironore
+
+# chemistry
+2,refinedoil;4;refinery;2,oil
+# TODO merge these into one recipe
+1,hydrogen;4;refinery;2,oil
+4,sulfuricacid;6;chemicalplant;4,refinedoil;8,stoneore;4,water
+plastic;3;chemicalplant;2,refinedoil;graphite
+2,graphene;3;chemicalplant;3,graphite;sulfuricacid
+organiccrystal;6;chemicalplant;2,plastic;refinedoil;water
+
+
+# basic materials
+gear;1;assembler;ironingot
+steel;3;smelter;3,ironingot
+glass;2;smelter;2,stoneore
+2,prism;2;assembler;3,glass
+diamond;2;smelter;graphite
+crystalsilicon;1;smelter;siliconingot
+
+# advanced materials
+2,magneticcoil;1;assembler;2,magnet;copperingot
+2,circuitboard; 1; assembler;ironingot;copperingot
+plasmaexiter;2;assembler;4,magneticcoil;2,prism
+motor;2;assembler;2,ironingot;gear;magneticcoil
+component;2;assembler;2,siliconingot;copperingot
+processor;3;assembler;2,circuitboard;2,component
+turbine;2;assembler;2,motor;2,magneticcoil
+supermagneticring;3;assembler;2,turbine;3,magnet;graphite
+titaniumcrystal;4;assembler;organiccrystal;3,titaniumingot
+photoncombiner;3;assembler;2,prism;circuitboard
+
+# products
+2,solarsail;4;assembler;graphene;photoncombiner
+
+# science
+bluescience;3;matrix;magneticcoil;circuitboard
+redscience;6;matrix;2,graphite;2,hydrogen
+yellowscience;8;matrix;diamond;titaniumcrystal
