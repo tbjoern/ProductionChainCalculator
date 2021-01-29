@@ -31,7 +31,7 @@ class ItemLookup:
         return cls(name_to_item, sorted_names)
 
     def item_for(self, name):
-        return self.name_to_item[name]
+        return self.name_to_item.get(name)
 
     def name_for(self, item):
         if item >= len(self.item_to_name):
@@ -72,7 +72,7 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]
             else:
                 parser.error(f"Parse error in {filename}:{i} - Item needs amount and name: {item_token}")
 
-            item_name = item_name.strip()
+            item_name = item_name.strip().lower()
             if len(item_name) == 0:
                 parser.error(f"Parse error in {filename}:{i} - Item name is empty")
 
@@ -103,7 +103,7 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]
                 else:
                     parser.error(f"Parse error in {filename}:{i} - Failed to parse ingredient {itoken}")
 
-                ingredient_item = ingredient_item.strip()
+                ingredient_item = ingredient_item.strip().lower()
                 if len(ingredient_item) == 0:
                     parser.error(f"Parse error in {filename}:{i} - Failed to parse ingredient {itoken}, item {ingredient_item} is empty")
                 ingredients.append((amount, ingredient_item))
@@ -123,6 +123,31 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]
 
     return item_lookup, recipes
 
+class Calculator:
+    def __init__(self, item_lookup, recipes):
+        self.item_lookup = item_lookup
+        self.recipes = recipes
+        self.item_tracker = [0 for _ in range(len(item_lookup.item_to_name))]
+
+    def make_item(self, item, amount):
+        self.item_tracker[item] += amount
+
+        recipe = self.recipes[item]
+        recipe_yield = recipe.result.amount
+        times_recipe_needed = float(amount) / recipe_yield
+        for ingredient in recipe.ingredients:
+            self.make_item(ingredient.item, ingredient.amount * times_recipe_needed)
+
+    def reset(self):
+        self.item_tracker = [0 for _ in range(len(item_lookup.item_to_name))]
+
+    def __str__(self):
+        lines = []
+        for item, amount in enumerate(self.item_tracker):
+            if amount > 0:
+                lines.append(f"{self.item_lookup.name_for(item)}: {amount}")
+        return "\n".join(lines)
+
 
 def main():
     global item_lookup
@@ -141,6 +166,36 @@ def main():
 
     print(item_lookup)
     print(recipes)
+
+    calculator = Calculator(item_lookup, recipes)
+    
+    while True:
+        try:
+            item_to_produce = input("What should be produced: ")
+            item_amount = input("How many: ")
+        except EOFError:
+            break
+
+        item_to_produce = item_to_produce.strip().lower()
+
+        if item_to_produce == "exit" or item_to_produce == "":
+            break
+
+        item = item_lookup.item_for(item_to_produce.strip())
+        if item is None:
+            print(f"Could not find {item}, choose one of")
+            print("\n".join(item_lookup.item_to_name))
+            continue
+
+        try:
+            item_amount = int(item_amount)
+        except ValueError:
+            print(f"Is not a number: {item_amount}")
+            continue
+
+        calculator.make_item(item, item_amount)
+        print(str(calculator))
+        calculator.reset()
 
 
 if __name__ == "__main__":
