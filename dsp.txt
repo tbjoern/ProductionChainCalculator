@@ -5,7 +5,7 @@ stoneore;2;extractor
 coal;2;extractor
 siliconore;2;extractor
 titaniumore;2;extractor
-oil;2;oilwell
+oil;1;oilwell
 water;2;waterpump
 
 # plates and direct smelts
