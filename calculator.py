@@ -70,9 +70,9 @@ def parse_item_amount(item_token):
     elif len(item_token) == 2:
         item_amount, item_name = item_token
         try:
-            item_amount = int(item_amount)
+            item_amount = float(item_amount)
         except ValueError:
-            raise ParseError(f"Item amount is not an int - {item_token}")
+            raise ParseError(f"Item amount is not an number - {item_token}")
     else:
         raise ParseError(f"Item needs amount and name - {item_token}")
 
