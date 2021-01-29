@@ -4,43 +4,10 @@ This is a generic production chain calculator.
 I made it for calulating production chains in various logistic games, such as
 Factorio, Satisfactory, and Dyson Sphere Program.
 
-It offers a very simple command line interface.
-
 It is entirely game-agnostic, meaning you can calculate production chains / ratios for any game out there,
 you just have to create a file that specifies which recipes exist in the game.
 
-# Features
-
-- Simple command line interface to specify which items to produce
-- Calculates needed raw and intermediate items
-- Prints a summary of how many items need to be produced per second, and calculates how many production facilities are needed
-- Takes into account recipes with multiple outputs and shows surplus production
-
-## Wishlist
-
-These features are not implemented yet, but I'd like to add them in the future.
-Roughly in order of priority
-- Basic graphical interface and binary executable, so its easily usable on windows without a CLI
-- Multiple recipes for the same item
-    For optional recipes in Satisfactory and Dyson Sphere Program, or various Oil cracking recipes
-- Circular dependencies 
-    Again, for Oil cracking recipes
-- Different time formats (items per min, hour etc)
-- Print total amount of needed production facilities 
-- Complete resource file for Dyson Sphere Program
-- Resource files for other games (factorio, satisfactory)
-
-
-# Installation
-
-Clone this repo and copy `calculator.py` and `dsp.txt` wherever you want them to live.
-A working python installation is needed. I used python 3.9.1, you need at least python 3.7 (for the yummy dataclasses).
-
-# Usage
-
-```bash
-python calculator.py --recipes dsp.txt
-```
+Allow me to demonstrate:
 ```
 Sucessfully loaded dsp.txt
 Items to produce/s (amount,item + ...): 2,bluescience + 2,redscience + 1,yellowscience
@@ -71,6 +38,37 @@ Additional products:
 refinedoil      :    3/s -   6 refinery
 ```
 
+## Features
+
+- Simple command line interface to specify which items to produce
+- Calculates needed raw and intermediate items
+- Prints a summary of how many items need to be produced per second, and calculates how many production facilities are needed
+- Takes into account recipes with multiple outputs and shows surplus production
+
+### Wishlist
+
+These features are not implemented yet, but I'd like to add them in the future.
+Roughly in order of priority
+- Basic graphical interface and binary executable, so its easily usable on windows without a CLI
+- Multiple recipes for the same item
+    For optional recipes in Satisfactory and Dyson Sphere Program, or various Oil cracking recipes
+- Circular dependencies 
+    Again, for Oil cracking recipes
+- Different time formats (items per min, hour etc)
+- Print total amount of needed production facilities 
+- Complete resource file for Dyson Sphere Program
+- Resource files for other games (factorio, satisfactory)
+
+## Installation
+
+Clone this repo and copy `calculator.py` and `dsp.txt` wherever you want them to live.
+A working python installation is needed. I used python 3.9.1, you need at least python 3.7 (for the yummy dataclasses).
+
+## Usage
+
+```bash
+python calculator.py --recipes dsp.txt
+```
 You will be prompted to enter the items you want to produce.
 They follow this format: `<item amount> ,<item name> + <item amount>,<item name> + ...` 
 All spaces are optional.
@@ -79,7 +77,7 @@ Type `help` to get a list of available commands.
 Type `list` or `ls` to show all available items.
 Type `exit` or press CTRL-D to quit.
 
-# Recipe file format
+## Recipe file format
 
 The calculator uses a custom file format to define items and recipes.
 See `dsp.txt` for an example.
