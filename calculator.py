@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 import logging
+import math
 
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.INFO)
@@ -150,7 +151,11 @@ class Calculator:
         lines = []
         for item, amount in enumerate(self.item_tracker):
             if amount > 0:
-                lines.append(f"{self.item_lookup.name_for(item)}: {amount}")
+                recipe = self.recipes[item]
+                factory = recipe.factory
+                items_per_second_per_factory = recipe.result.amount / recipe.time
+                factories_needed = math.ceil(amount / items_per_second_per_factory)
+                lines.append(f"{self.item_lookup.name_for(item)}: {amount}/s - {factories_needed} {factory}")
         return "\n".join(lines)
 
 
