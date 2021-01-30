@@ -27,6 +27,9 @@ class ItemAmount:
         item = item_lookup.item_for(name)
         return cls(amount, item)
 
+    def __iter__(self):
+        return iter((self.amount, self.item))
+
 @dataclass
 class ItemLookup:
     name_to_item: Dict[str, Item]
@@ -138,16 +141,18 @@ class Calculator:
         self.recipes = recipes
         self.item_tracker = None
         self.additional_items = None
+        self.item_hierarchy = None
         self.reset()
 
     def _make_item_list(self):
         return [0 for _ in range(len(self.item_lookup.item_to_name))]
 
-    def make_item(self, item, amount):
+    def make_item(self, item, amount, level=0):
         self.item_tracker[item] += amount
+        self.item_hierarchy[item] = max(self.item_hierarchy[item], level)
+
         amount = amount - self.additional_items[item] 
         self.additional_items[item] = max(0, -amount)
-
         if amount < 0:
             return
 
@@ -157,7 +162,7 @@ class Calculator:
 
         times_recipe_needed = float(amount) / recipe_yield
         for ingredient in recipe.ingredients:
-            self.make_item(ingredient.item, ingredient.amount * times_recipe_needed)
+            self.make_item(ingredient.item, ingredient.amount * times_recipe_needed, level=level+1)
 
         for result in recipe.results:
             if item != result.item:
@@ -166,16 +171,26 @@ class Calculator:
     def reset(self):
         self.item_tracker = self._make_item_list()
         self.additional_items = self._make_item_list()
+        self.item_hierarchy = self._make_item_list()
 
-    def _format_item_list(self, item_list) -> List[str]:
+    def _format_item_list(self, item_counts: List[int]) -> List[str]:
         lines = []
-        for item, amount in enumerate(item_list):
+        max_item_level = max(self.item_hierarchy)
+        buckets = [[] for _ in range(max_item_level+1)]
+        for item, amount in enumerate(item_counts):
             if amount > 0:
-                recipe = self.recipes[item]
-                factory = recipe.factory
-                items_per_second_per_factory = recipe.get_amount(item) / recipe.time
-                factories_needed = math.ceil(amount / items_per_second_per_factory)
-                lines.append(f"{self.item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3} {factory}")
+                item_level = self.item_hierarchy[item]
+                buckets[item_level].append(ItemAmount(amount, item))
+        for level, bucket in enumerate(buckets):
+            if len(bucket) > 0 and level > 0:
+                lines.append("")
+            for amount, item in bucket:
+                if amount > 0:
+                    recipe = self.recipes[item]
+                    factory = recipe.factory
+                    items_per_second_per_factory = recipe.get_amount(item) / recipe.time
+                    factories_needed = math.ceil(amount / items_per_second_per_factory)
+                    lines.append(f"{self.item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3} {factory}")
         return lines
 
     def __str__(self):
