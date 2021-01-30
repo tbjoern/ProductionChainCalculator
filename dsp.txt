@@ -7,6 +7,7 @@ siliconore;2; siliconvein
 titaniumore;2; titaniumvein
 oil;1;oilwell
 water;2;waterpump
+fireice;1;fireice
 
 # plates and direct smelts
 ironingot; 1; smelter;ironore
@@ -21,7 +22,8 @@ magnet;1.5;smelter;ironore
 1,hydrogen+2,refinedoil;4;refinery;2,oil
 4,sulfuricacid;6;chemicalplant;4,refinedoil;8,stoneore;4,water
 plastic;3;chemicalplant;2,refinedoil;graphite
-2,graphene;3;chemicalplant;3,graphite;sulfuricacid
+#2,graphene;3;chemicalplant;3,graphite;sulfuricacid
+2,graphene+1,hydrogen;2;chemicalplant;2,fireice
 organiccrystal;6;chemicalplant;2,plastic;refinedoil;water
 
 
@@ -46,6 +48,8 @@ titaniumcrystal;4;assembler;organiccrystal;3,titaniumingot
 photoncombiner;3;assembler;2,prism;circuitboard
 particlecontainer;4;assembler;2,turbine;2,copperingot;2,graphene
 4,titaniumalloy;12;smelter;4,titaniumingot;4,steel;8,sulfuricacid
+particlebroadband;8;assembler;2,nanotube;2,crystalsilicon;plastic
+2,nanotube;4;chemicalplant;3,graphene;titaniumingot
 
 # products
 2,solarsail;4;assembler;graphene;photoncombiner
@@ -54,3 +58,4 @@ particlecontainer;4;assembler;2,turbine;2,copperingot;2,graphene
 bluescience;3;matrix;magneticcoil;circuitboard
 redscience;6;matrix;2,graphite;2,hydrogen
 yellowscience;8;matrix;diamond;titaniumcrystal
+purplescience;10;matrix;particlebroadband;2,processor
