@@ -217,11 +217,16 @@ class Calculator:
                 if amount > 0:
                     recipe = self.recipes[item]
                     yield item, amount, recipe
+            yield None
 
 def format_calculator_result(calculator: Calculator, item_lookup: ItemLookup):
     lines = []
     lines.append("Required products:")
-    for item, amount, recipe in calculator.get_required_items():
+    for result in calculator.get_required_items():
+        if result is None:
+            lines.append("")
+            continue
+        item, amount, recipe = result
         factory = recipe.factory
         items_per_second_per_factory = recipe.get_amount(item) / recipe.time
         factories_needed = amount / items_per_second_per_factory
@@ -229,7 +234,10 @@ def format_calculator_result(calculator: Calculator, item_lookup: ItemLookup):
 
     if calculator.has_additional_items():
         lines.append("Additional products:")
-        for item, amount, recipe in calculator.get_additional_items():
+        for result in calculator.get_additional_items():
+            if result is None:
+                continue
+            item, amount, recipe = result
             lines.append(f"{item_lookup.name_for(item):<16}: {float(amount): >4g}/s")
 
     return "\n".join(lines)
@@ -252,6 +260,7 @@ help_msg="""Usage:
 ls, list, items : Show all available items
 recipes         : Show all recipes
 setoptional     : Select a different recipe for an item
+showoptional    : Show all items that have optional recipes, and which one is selected
 ?, help         : Print this help
 exit, CTRL-D    : Exit the program
 """

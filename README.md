@@ -10,32 +10,38 @@ you just have to create a file that specifies which recipes exist in the game.
 Allow me to demonstrate:
 ```
 Sucessfully loaded dsp.txt
-Items to produce/s (amount,item + ...): 2,bluescience + 2,redscience + 1,yellowscience
+Items to produce/s (amount,item + ...): 2,bluescience + 2,redscience + yellowscience
 Required products:
 bluescience     :    2/s -   6 matrix
-circuitboard    :    2/s -   1 assembler
-coal            :   14/s -  28 coalvein
-copperingot     :    2/s -   2 smelter
-copperore       :    2/s -   4 coppervein
-diamond         :    1/s -   2 smelter
-graphite        :    7/s -  14 smelter
-hydrogen        :    4/s -  16 refinery
-ironingot       :    1/s -   1 smelter
-ironore         :    3/s -   6 ironvein
-magnet          :    2/s -   3 smelter
-magneticcoil    :    2/s -   1 assembler
-oil             :    8/s -   8 oilwell
-organiccrystal  :    1/s -   6 chemicalplant
-plastic         :    2/s -   6 chemicalplant
 redscience      :    2/s -  12 matrix
-refinedoil      :    5/s -  10 refinery
+yellowscience   :    1/s -   8 matrix
+
+circuitboard    :    2/s -   1 assembler
+diamond         :    1/s -   2 smelter
+hydrogen        :    4/s -  16 refinery
+magneticcoil    :    2/s -   1 assembler
 titaniumcrystal :    1/s -   4 assembler
+
+copperingot     :    2/s -   2 smelter
+ironingot       :    1/s -   1 smelter
+magnet          :    2/s -   3 smelter
+organiccrystal  :    1/s -   6 chemicalplant
 titaniumingot   :    3/s -   6 smelter
+
+copperore       :    2/s -   4 coppervein
+ironore         :    3/s -   6 ironvein
+plastic         :    2/s -   6 chemicalplant
 titaniumore     :    6/s -  12 titaniumvein
 water           :    1/s -   2 waterpump
-yellowscience   :    1/s -   8 matrix
+
+graphite        :    7/s -  14 smelter
+refinedoil      :    5/s -  10 refinery
+
+coal            :   14/s -  28 coalvein
+oil             :    8/s -   8 oilwell
+
 Additional products:
-refinedoil      :    3/s -   6 refinery
+refinedoil      :    3/s
 ```
 
 ## Features
@@ -44,20 +50,20 @@ refinedoil      :    3/s -   6 refinery
 - Calculates needed raw and intermediate items
 - Prints a summary of how many items need to be produced per second, and calculates how many production facilities are needed
 - Takes into account recipes with multiple outputs and shows surplus production
+- Optional recipe support -> select which recipe to use if there are multiple
 
 ### Wishlist
 
 These features are not implemented yet, but I'd like to add them in the future.
 Roughly in order of priority
 - Basic graphical interface and binary executable, so its easily usable on windows without a CLI
-- Multiple recipes for the same item
-    For optional recipes in Satisfactory and Dyson Sphere Program, or various Oil cracking recipes
 - Circular dependencies 
-    Again, for Oil cracking recipes
+    For Oil cracking recipes
 - Different time formats (items per min, hour etc)
 - Print total amount of needed production facilities 
 - Complete resource file for Dyson Sphere Program
 - Resource files for other games (factorio, satisfactory)
+- Inverse calculator: Given some input resources, how many can I make of the requested products?
 
 ## Installation
 
