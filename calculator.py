@@ -171,8 +171,7 @@ class Calculator:
 
         amount = amount - self.additional_items[item] 
         self.additional_items[item] = max(0, -amount)
-        if amount < 0:
-            return
+        amount = max(amount, 0)
 
         if not item in self.recipes:
             logger.warning("Could not find a recipe for item {item}")
