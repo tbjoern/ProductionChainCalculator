@@ -219,23 +219,19 @@ class Calculator:
                     recipe = self.recipes[item]
                     yield item, amount, recipe
 
-def format_result(item, amount, recipe, item_lookup: ItemLookup):
-    factory = recipe.factory
-    items_per_second_per_factory = recipe.get_amount(item) / recipe.time
-    factories_needed = math.ceil(amount / items_per_second_per_factory)
-    return f"{item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3} {factory}"
-
-
 def format_calculator_result(calculator: Calculator, item_lookup: ItemLookup):
     lines = []
     lines.append("Required products:")
-    for result in calculator.get_required_items():
-        lines.append(format_result(*result, item_lookup))
+    for item, amount, recipe in calculator.get_required_items():
+        factory = recipe.factory
+        items_per_second_per_factory = recipe.get_amount(item) / recipe.time
+        factories_needed = amount / items_per_second_per_factory
+        lines.append(f"{item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3g} {factory}")
 
     if calculator.has_additional_items():
         lines.append("Additional products:")
-        for result in calculator.get_additional_items():
-            lines.append(format_result(*result, item_lookup))
+        for item, amount, recipe in calculator.get_additional_items():
+            lines.append(f"{item_lookup.name_for(item):<16}: {float(amount): >4g}/s")
 
     return "\n".join(lines)
 
