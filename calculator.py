@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple, Sequence
+from typing import Dict, List, Tuple, Sequence, Optional
 import logging
 import math
 
@@ -65,6 +65,9 @@ class Recipe:
                 return result.amount
         return None
 
+    def __iter__(self):
+        return iter((self.results, self.ingredients, self.time, self.factory))
+
 def parse_item_amount(item_token):
     item_token = item_token.split(',')
     if len(item_token) == 1:
@@ -85,7 +88,7 @@ def parse_item_amount(item_token):
 
     return (item_amount, item_name)
 
-def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]]:
+def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, List[Recipe]]:
     global item_lookup
     item_names = set()
     raw_recipes = []
@@ -124,28 +127,40 @@ def load_recipes(filename: Path, parser) -> Tuple[ItemLookup, Dict[Item, Recipe]
     
     item_lookup = ItemLookup.from_name_list(item_names)
     
-    recipes = {}
+    recipes = []
     for raw_results, raw_ingredients, time, factory in raw_recipes:
         ingredients = [ItemAmount.resolve(*r) for r in raw_ingredients]
         results = [ItemAmount.resolve(*r) for r in raw_results]
-        for result in results:
-            recipes[result.item] = Recipe(results, ingredients, time, factory)
+        recipes.append(Recipe(results, ingredients, time, factory))
 
     print(f"Sucessfully loaded {filename.name}")
 
     return item_lookup, recipes
 
+def build_item_recipe_map(recipes: List[Recipe]) -> Dict[Item, List[Recipe]]:
+    item_recipe_map = {}
+    for recipe in recipes:
+        # results: List[ItemAmount]
+        for amount, item in recipe.results:
+            if item not in item_recipe_map:
+                item_recipe_map[item] = []
+            item_recipe_map[item].append(recipe)
+    return item_recipe_map
+
 class Calculator:
-    def __init__(self, item_lookup, recipes):
-        self.item_lookup = item_lookup
-        self.recipes = recipes
+    def __init__(self, item_count: int):
+        self.item_count = item_count
+        self.recipes = {}
         self.item_tracker = None
         self.additional_items = None
         self.item_hierarchy = None
         self.reset()
+    
+    def set_item_recipe(self, item: Item, recipe: Recipe):
+        self.recipes[item] = recipe
 
     def _make_item_list(self):
-        return [0 for _ in range(len(self.item_lookup.item_to_name))]
+        return [0 for _ in range(self.item_count)]
 
     def make_item(self, item, amount, level=0):
         self.item_tracker[item] += amount
@@ -156,6 +171,9 @@ class Calculator:
         if amount < 0:
             return
 
+        if not item in self.recipes:
+            logger.warning("Could not find a recipe for item {item}")
+            return
         recipe = self.recipes[item]
         recipe_yield = recipe.get_amount(item)
         assert recipe_yield is not None
@@ -173,7 +191,16 @@ class Calculator:
         self.additional_items = self._make_item_list()
         self.item_hierarchy = self._make_item_list()
 
-    def _format_item_list(self, item_counts: List[int]) -> List[str]:
+    def get_required_items(self):
+        return self._iter_item_list(self.item_tracker)
+
+    def get_additional_items(self):
+        return self._iter_item_list(self.additional_items)
+
+    def has_additional_items(self):
+        return any(self.additional_items)
+
+    def _iter_item_list(self, item_counts: List[int]) -> List[str]:
         lines = []
         max_item_level = max(self.item_hierarchy)
         buckets = [[] for _ in range(max_item_level+1)]
@@ -187,26 +214,60 @@ class Calculator:
             for amount, item in bucket:
                 if amount > 0:
                     recipe = self.recipes[item]
-                    factory = recipe.factory
-                    items_per_second_per_factory = recipe.get_amount(item) / recipe.time
-                    factories_needed = math.ceil(amount / items_per_second_per_factory)
-                    lines.append(f"{self.item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3} {factory}")
-        return lines
+                    yield item, amount, recipe
 
-    def __str__(self):
-        lines = []
-        lines.append("Required products:")
-        lines += self._format_item_list(self.item_tracker)
-        if any(self.additional_items):
-            lines.append("Additional products:")
-            lines += self._format_item_list(self.additional_items)
-        return "\n".join(lines)
+def format_result(item, amount, recipe, item_lookup: ItemLookup):
+    factory = recipe.factory
+    items_per_second_per_factory = recipe.get_amount(item) / recipe.time
+    factories_needed = math.ceil(amount / items_per_second_per_factory)
+    return f"{item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3} {factory}"
+
+
+def format_calculator_result(calculator: Calculator, item_lookup: ItemLookup):
+    lines = []
+    lines.append("Required products:")
+    for result in calculator.get_required_items():
+        lines.append(format_result(*result, item_lookup))
+
+    if calculator.has_additional_items():
+        lines.append("Additional products:")
+        for result in calculator.get_additional_items():
+            lines.append(format_result(*result, item_lookup))
+
+    return "\n".join(lines)
+
+def format_item_amount(item_amount: ItemAmount, item_lookup: ItemLookup) -> str:
+    amount, item = item_amount
+    if amount > 1:
+        return f"{amount:g},{item_lookup.name_for(item)}"
+    return f"{item_lookup.name_for(item)}"
+
+def format_recipe(recipe: Recipe, item_lookup: ItemLookup) -> str:
+    tokens = []
+    tokens += [", ".join(format_item_amount(ingredient, item_lookup) for ingredient in recipe.ingredients)]
+    tokens += ["->"]
+    tokens += ["+".join(format_item_amount(result, item_lookup) for result in recipe.results)]
+    return " ".join(tokens)
+
 
 help_msg="""Usage:
-ls, list     : Show all available items
-?, help      : Print this help
-exit, CTRL-D : Exit the program
+ls, list, items : Show all available items
+recipes         : Show all recipes
+setoptional     : Select a different recipe for an item
+?, help         : Print this help
+exit, CTRL-D    : Exit the program
 """
+
+def read_command(prompt: str) -> Optional[str]:
+    try:
+        command = input(prompt)
+    except EOFError:
+        return None
+
+    if command == "exit" or command == "":
+        return None
+
+    return command
 
 def main():
     global item_lookup
@@ -221,28 +282,68 @@ def main():
     if not args.recipes.is_file():
         parser.error(f"{args.recipes} is not a file")
 
-    item_lookup, recipes = load_recipes(args.recipes, parser)
+    item_lookup, all_recipes = load_recipes(args.recipes, parser)
+    item_recipe_map = build_item_recipe_map(all_recipes)
 
-    calculator = Calculator(item_lookup, recipes)
+    calculator = Calculator(len(item_lookup.item_to_name))
+
+    # set default recipes
+    for item, recipes in item_recipe_map.items():
+        assert len(recipes) > 0
+        calculator.set_item_recipe(item, recipes[0])
+
+    # find items with optional recipes
+    optional_recipe_items = []
+    for item, recipes in item_recipe_map.items():
+        if len(recipes) > 1:
+            optional_recipe_items.append(item)
     
     while True:
-        try:
-            item_spec = input("Items to produce/s (amount,item + ...): ")
-        except EOFError:
+        command = read_command("Items to produce/s (amount,item + ...): ")
+        if command is None:
             break
 
-        if item_spec == "exit" or item_spec == "":
-            break
-
-        if item_spec == "ls" or item_spec == "list":
+        if command == "ls" or command == "list" or command == "items":
             print("\n".join(item_lookup.item_to_name))
             print()
             continue
 
-        if item_spec == "?" or item_spec == "help":
+        if command == "?" or command == "help":
             print(help_msg)
             print()
             continue
+
+        if command == "recipes":
+            for recipe in all_recipes:
+                print(format_recipe(recipe, item_lookup))
+            print()
+            continue
+
+        if command == "setoptional":
+            print("\n".join([item_lookup.name_for(item) for item in optional_recipe_items]))
+            item = None
+            item_name = read_command("Select item: ")
+            if item_name is None:
+                continue
+            item = item_lookup.item_for(item_name)
+            if item is None:
+                print("Could not find {item_name}")
+
+            available_recipes = item_recipe_map[item]
+            print("\n".join(f"{i}: {format_recipe(recipe, item_lookup)}" for i, recipe in enumerate(available_recipes)))
+            selection = read_command("Select recipe nr: ")
+            try:
+                selection_index = int(selection)
+            except ValueError:
+                print("That is not a number")
+                continue
+            if selection_index > len(available_recipes) - 1 or selection_index < 0:
+                print("That recipe doesnt exist")
+
+            calculator.set_item_recipe(item, available_recipes[selection_index])
+            continue
+        
+        item_spec = command
 
         try:
             item_amounts = [ItemAmount.resolve(*parse_item_amount(token)) for token in item_spec.split('+')]
@@ -253,7 +354,7 @@ def main():
 
         for item_amount in item_amounts:
             calculator.make_item(item_amount.item, item_amount.amount)
-        print(str(calculator))
+        print(format_calculator_result(calculator, item_lookup))
         calculator.reset()
         print()
 
