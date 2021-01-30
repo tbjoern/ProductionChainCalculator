@@ -159,6 +159,9 @@ class Calculator:
     def set_item_recipe(self, item: Item, recipe: Recipe):
         self.recipes[item] = recipe
 
+    def get_item_recipe(self, item: Item):
+        return self.recipes[item]
+
     def _make_item_list(self):
         return [0 for _ in range(self.item_count)]
 
@@ -239,14 +242,14 @@ def format_calculator_result(calculator: Calculator, item_lookup: ItemLookup):
 def format_item_amount(item_amount: ItemAmount, item_lookup: ItemLookup) -> str:
     amount, item = item_amount
     if amount > 1:
-        return f"{amount:g},{item_lookup.name_for(item)}"
+        return f"{amount:g} {item_lookup.name_for(item)}"
     return f"{item_lookup.name_for(item)}"
 
 def format_recipe(recipe: Recipe, item_lookup: ItemLookup) -> str:
     tokens = []
-    tokens += [", ".join(format_item_amount(ingredient, item_lookup) for ingredient in recipe.ingredients)]
+    tokens += [" + ".join(format_item_amount(ingredient, item_lookup) for ingredient in recipe.ingredients)]
     tokens += ["->"]
-    tokens += ["+".join(format_item_amount(result, item_lookup) for result in recipe.results)]
+    tokens += [" + ".join(format_item_amount(result, item_lookup) for result in recipe.results)]
     return " ".join(tokens)
 
 
@@ -332,6 +335,8 @@ def main():
             available_recipes = item_recipe_map[item]
             print("\n".join(f"{i}: {format_recipe(recipe, item_lookup)}" for i, recipe in enumerate(available_recipes)))
             selection = read_command("Select recipe nr: ")
+            if selection is None:
+                continue
             try:
                 selection_index = int(selection)
             except ValueError:
@@ -341,6 +346,12 @@ def main():
                 print("That recipe doesnt exist")
 
             calculator.set_item_recipe(item, available_recipes[selection_index])
+            continue
+
+        if command == "showoptional":
+            for item in optional_recipe_items:
+                recipe = calculator.get_item_recipe(item)
+                print(f"{item_lookup.name_for(item)}: {format_recipe(recipe, item_lookup)}")
             continue
         
         item_spec = command
