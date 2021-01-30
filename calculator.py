@@ -327,15 +327,19 @@ def main():
             item = None
             item_name = read_command("Select item: ")
             if item_name is None:
+                print()
                 continue
             item = item_lookup.item_for(item_name)
             if item is None:
-                print("Could not find {item_name}")
+                print(f"Could not find {item_name}")
+                print()
+                continue
 
             available_recipes = item_recipe_map[item]
             print("\n".join(f"{i}: {format_recipe(recipe, item_lookup)}" for i, recipe in enumerate(available_recipes)))
             selection = read_command("Select recipe nr: ")
             if selection is None:
+                print()
                 continue
             try:
                 selection_index = int(selection)
@@ -346,12 +350,14 @@ def main():
                 print("That recipe doesnt exist")
 
             calculator.set_item_recipe(item, available_recipes[selection_index])
+            print()
             continue
 
         if command == "showoptional":
             for item in optional_recipe_items:
                 recipe = calculator.get_item_recipe(item)
                 print(f"{item_lookup.name_for(item)}: {format_recipe(recipe, item_lookup)}")
+            print()
             continue
         
         item_spec = command
