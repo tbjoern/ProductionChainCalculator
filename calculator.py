@@ -259,11 +259,15 @@ def format_bool(b):
 class FormatOptions:
     show_ingredients: bool = False
     treeview: bool = False
+    summary: bool = True
+    factories_summary: bool = True
 
     def __str__(self):
         return "\n".join([
-            f"Show ingredients: {format_bool(self.show_ingredients)}",
-            f"Treeview        : {format_bool(self.treeview)}"
+            f"Show ingredients : {format_bool(self.show_ingredients)}",
+            f"Treeview         : {format_bool(self.treeview)}",
+            f"Item totals      : {format_bool(self.summary)}",
+            f"Factories summary: {format_bool(self.factories_summary)}"
         ])
 
 @dataclass
@@ -279,7 +283,6 @@ def calculate_factory_count(item, recipe, amount):
 def format_summary(nodes, calculator: Calculator, show_ingredients=False):
     lines = []
     lines.append("--- Required products ---")
-    factories = {}
     for result in calculator.get_required_items():
         if result is None:
             lines.append("")
@@ -287,9 +290,6 @@ def format_summary(nodes, calculator: Calculator, show_ingredients=False):
         item, amount, recipe = result
         factory = recipe.factory
         factories_needed = calculate_factory_count(item, recipe, amount)
-        if not factory in factories:
-            factories[factory] = 0
-        factories[factory] += factories_needed
         lines.append(f"{item.name:<16}: {float(amount): >4g}/s - {factories_needed: >3.3g} {factory}")
 
         if show_ingredients:
@@ -308,10 +308,6 @@ def format_summary(nodes, calculator: Calculator, show_ingredients=False):
                 factory_count = calculate_factory_count(ingredient, recipe, amount)
                 lines.append(f"  {ingredient.name:<16}: {float(amount): >4g}/s - {factories_needed: >3.3g} {factory}")
 
-    lines.append("--- Needed factories ---")
-    for factory, count in factories.items():
-        lines.append(f"{factory:<16}: {count: >3.3g}")
-
     if calculator.has_additional_items():
         lines.append("--- Additional products ---")
         for result in calculator.get_additional_items():
@@ -320,7 +316,25 @@ def format_summary(nodes, calculator: Calculator, show_ingredients=False):
             item, amount, recipe = result
             lines.append(f"{item.name:<16}: {float(amount): >4g}/s")
 
-    return "\n".join(lines)
+    return lines
+
+def format_factories_summary(calculator: Calculator):
+    lines = []
+    factories = {}
+    for result in calculator.get_required_items():
+        if result is None:
+            continue
+        item, amount, recipe = result
+        factory = recipe.factory
+        factories_needed = calculate_factory_count(item, recipe, amount)
+        if not factory in factories:
+            factories[factory] = 0
+        factories[factory] += factories_needed
+
+    lines.append("--- Needed factories ---")
+    for factory, count in factories.items():
+        lines.append(f"{factory:<16}: {count: >3.3g}")
+    return lines
 
 def format_item_amount(item_amount: ItemAmount) -> str:
     amount, item = item_amount
@@ -337,7 +351,7 @@ def format_recipe(recipe: Recipe) -> str:
     tokens += [f" {recipe.factory}"]
     return " ".join(tokens)
 
-def format_as_tree(nodes: List[Node], calculator: Calculator):
+def format_tree(nodes: List[Node], calculator: Calculator):
     lines = []
     lines.append("--- Tree View ---")
     for start in nodes:
@@ -349,21 +363,26 @@ def format_as_tree(nodes: List[Node], calculator: Calculator):
             factory = recipe.factory
             factories_needed = calculate_factory_count(item, recipe, amount)
             lines.append(f"{'  ' * level}{item.name} {float(amount):g}/s - {factories_needed:g} {factory}")
-    return '\n'.join(lines)
+    return lines
 
 def format_result(result: CalculatorResult, format_options: FormatOptions):
+    lines = []
+    if format_options.summary:
+        lines += format_summary(result.nodes, result.calculator, show_ingredients=format_options.show_ingredients)
+    if format_options.factories_summary:
+        lines += format_factories_summary(result.calculator)
     if format_options.treeview:
-        return format_as_tree(result.nodes, result.calculator)
-    else:
-        return format_summary(result.nodes, result.calculator, show_ingredients=format_options.show_ingredients)
-        
-
+        lines += format_tree(result.nodes, result.calculator)
+    return "\n".join(lines)
 
 help_msg="""Usage:
 ls, list, items : Show all available items
 recipes         : Show all recipes
 setoptional     : Select a different recipe for an item
 showoptional    : Show all items that have optional recipes, and which one is selected
+tree, treeview  : Toggle treeview on/off
+showingredients : Show immediate ingredients in summary view, toggle on/off
+summary         : Toggle summary of item totals on/off
 ?, help         : Print this help
 exit, CTRL-D    : Exit the program
 """
@@ -514,8 +533,20 @@ def main():
             if last_result is not None:
                 print(format_result(last_result, format_options))
 
-        elif command == "expand" or command == "showingredients":
+        elif command == "showingredients":
             format_options.show_ingredients = not format_options.show_ingredients
+            print(format_options)
+            if last_result is not None:
+                print(format_result(last_result, format_options))
+
+        elif command == "factories":
+            format_options.factories_summary = not format_options.factories_summary
+            print(format_options)
+            if last_result is not None:
+                print(format_result(last_result, format_options))
+
+        elif command == "summary":
+            format_options.summary = not format_options.summary
             print(format_options)
             if last_result is not None:
                 print(format_result(last_result, format_options))
