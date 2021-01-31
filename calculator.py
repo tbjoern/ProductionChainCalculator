@@ -283,9 +283,11 @@ def format_item_amount(item_amount: ItemAmount) -> str:
 
 def format_recipe(recipe: Recipe) -> str:
     tokens = []
-    tokens += [" + ".join(format_item_amount(ingredient) for ingredient in recipe.ingredients)]
-    tokens += ["->"]
+    if len(recipe.ingredients) > 0:
+        tokens += [" + ".join(format_item_amount(ingredient) for ingredient in recipe.ingredients)]
+        tokens += ["->"]
     tokens += [" + ".join(format_item_amount(result) for result in recipe.results)]
+    tokens += [f" {recipe.factory}"]
     return " ".join(tokens)
 
 def format_nodes(nodes: List[Node], calculator):
