@@ -9,7 +9,7 @@ oil;1;oilwell
 water;2;waterpump
 fireice;1;fireice
 spiniformstalagmitecrystal;2;spiniformstalagmitecystalvein
-opticalgratingcystal;2;opticalgratingcrystalvein
+opticalgratingcrystal;2;opticalgratingcrystalvein
 kimberliteore;2;kimberlitevein
 unipolarmagnet;2;unipolarmagnetvein
 
