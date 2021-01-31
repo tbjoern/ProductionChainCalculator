@@ -392,32 +392,24 @@ def main():
         if command is None:
             break
 
-        if command == "ls" or command == "list" or command == "items":
+        elif command == "ls" or command == "list" or command == "items":
             command_ls()
-            print()
-            continue
 
-        if command == "?" or command == "help":
+        elif command == "?" or command == "help":
             command_help()
-            print()
-            continue
 
-        if command == "recipes":
+        elif command == "recipes":
             command_recipes(all_recipes)
-            print()
-            continue
 
-        if command == "setoptional":
+        elif command == "setoptional":
             command_setoptional(optional_recipe_items, item_recipe_map, calculator)
-            print()
-            continue
 
-        if command == "showoptional":
+        elif command == "showoptional":
             command_showoptional(optional_recipe_items, calculator)
-            print()
-            continue
         
-        command_calculate(command, calculator)
+        else:
+            command_calculate(command, calculator)
+
         print()
 
 
