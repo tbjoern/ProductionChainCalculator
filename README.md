@@ -11,37 +11,79 @@ Allow me to demonstrate:
 ```
 Sucessfully loaded dsp.txt
 Items to produce/s (amount,item + ...): 2,bluescience + 2,redscience + yellowscience
-Required products:
+--- Required products ---
 bluescience     :    2/s -   6 matrix
 redscience      :    2/s -  12 matrix
 yellowscience   :    1/s -   8 matrix
 
-circuitboard    :    2/s -   1 assembler
-diamond         :    1/s -   2 smelter
 hydrogen        :    4/s -  16 refinery
+diamond         :    1/s -   2 smelter
 magneticcoil    :    2/s -   1 assembler
+circuitboard    :    2/s -   1 assembler
 titaniumcrystal :    1/s -   4 assembler
 
-copperingot     :    2/s -   2 smelter
 ironingot       :    1/s -   1 smelter
+copperingot     :    2/s -   2 smelter
+titaniumingot   :    3/s -   6 smelter
 magnet          :    2/s -   3 smelter
 organiccrystal  :    1/s -   6 chemicalplant
-titaniumingot   :    3/s -   6 smelter
 
-copperore       :    2/s -   4 coppervein
 ironore         :    3/s -   6 ironvein
-plastic         :    2/s -   6 chemicalplant
+copperore       :    2/s -   4 coppervein
 titaniumore     :    6/s -  12 titaniumvein
 water           :    1/s -   2 waterpump
+plastic         :    2/s -   6 chemicalplant
 
 graphite        :    7/s -  14 smelter
 refinedoil      :    5/s -  10 refinery
 
 coal            :   14/s -  28 coalvein
 oil             :    8/s -   8 oilwell
-
-Additional products:
+--- Needed factories ---
+matrix          :  26
+refinery        :  26
+smelter         :  28
+assembler       :   6
+chemicalplant   :  12
+ironvein        :   6
+coppervein      :   4
+titaniumvein    :  12
+waterpump       :   2
+coalvein        :  28
+oilwell         :   8
+--- Additional products ---
 refinedoil      :    3/s
+--- Tree View ---
+bluescience 2/s - 6 matrix
+    magneticcoil 2/s - 1 assembler
+        magnet 2/s - 3 smelter
+            ironore 2/s - 4 ironvein
+        copperingot 1/s - 1 smelter
+            copperore 1/s - 2 coppervein
+    circuitboard 2/s - 1 assembler
+        ironingot 1/s - 1 smelter
+            ironore 1/s - 2 ironvein
+        copperingot 1/s - 1 smelter
+            copperore 1/s - 2 coppervein
+redscience 2/s - 12 matrix
+    graphite 4/s - 8 smelter
+        coal 8/s - 16 coalvein
+    hydrogen 4/s - 16 refinery
+        oil 8/s - 8 oilwell
+yellowscience 1/s - 8 matrix
+    diamond 1/s - 2 smelter
+        graphite 1/s - 2 smelter
+            coal 2/s - 4 coalvein
+    titaniumcrystal 1/s - 4 assembler
+        organiccrystal 1/s - 6 chemicalplant
+            plastic 2/s - 6 chemicalplant
+                refinedoil 4/s - 8 refinery
+                graphite 2/s - 4 smelter
+                    coal 4/s - 8 coalvein
+            refinedoil 1/s - 2 refinery
+            water 1/s - 2 waterpump
+        titaniumingot 3/s - 6 smelter
+            titaniumore 6/s - 12 titaniumvein
 ```
 
 ## Features
@@ -52,6 +94,7 @@ refinedoil      :    3/s
 - Takes into account recipes with multiple outputs and shows surplus production
 - Optional recipe support -> select which recipe to use if there are multiple
 - Shows total amount of needed production facilities 
+- Show a tree view of which items need which subitems and so on
 
 ### Wishlist
 
