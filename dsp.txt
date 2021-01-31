@@ -41,7 +41,7 @@ crystalsilicon;1;smelter;siliconingot
 
 # intermediate materials
 2,magneticcoil;1;assembler;2,magnet;copperingot
-2,circuitboard; 1; assembler;ironingot;copperingot
+2,circuitboard; 1; assembler;2,ironingot;copperingot
 plasmaexiter;2;assembler;4,magneticcoil;2,prism
 photoncombiner;3;assembler;2,prism;circuitboard
 
