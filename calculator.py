@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Sequence, Optional
 import logging
 import math
+import readline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.INFO)
