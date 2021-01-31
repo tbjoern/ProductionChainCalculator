@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple, Sequence, Optional
@@ -6,8 +7,6 @@ import math
 
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.INFO)
-
-Item = int
 
 @dataclass
 class Item:
@@ -282,6 +281,84 @@ def read_command(prompt: str) -> Optional[str]:
 
     return command
 
+def command_ls():
+    print("\n".join(str(item) for item in Item.item_list))
+
+def command_help():
+    print(help_msg)
+
+def command_recipes(all_recipes):
+    for recipe in all_recipes:
+        print(format_recipe(recipe))
+
+def command_showoptional(optional_recipe_items, calculator):
+    for item in optional_recipe_items:
+        recipe = calculator.get_item_recipe(item)
+        print(f"{item.name}: {format_recipe(recipe)}")
+
+def command_setoptional(optional_recipe_items, item_recipe_map, calculator):
+    print("\n".join([item.name for item in optional_recipe_items]))
+    item = None
+    item_name = read_command("Select item: ")
+    if item_name is None:
+        print()
+        return
+    item = Item.get_from(item_name)
+    if item is None:
+        print(f"Could not find {item_name}")
+        print()
+        return
+
+    available_recipes = item_recipe_map[item]
+    print("\n".join(f"{i}: {format_recipe(recipe)}" for i, recipe in enumerate(available_recipes)))
+    selection = read_command("Select recipe nr: ")
+    if selection is None:
+        print()
+        return
+    try:
+        selection_index = int(selection)
+    except ValueError:
+        print("That is not a number")
+        return
+    if selection_index > len(available_recipes) - 1 or selection_index < 0:
+        print("That recipe doesnt exist")
+        return
+
+    calculator.set_item_recipe(item, available_recipes[selection_index])
+
+def command_calculate(item_spec, calculator):
+    def parse_spec(spec) -> List[ItemAmount]:
+        return [parse_item_amount(token, allow_create=False) for token in spec.split('+')]
+
+    try:
+        parts = item_spec.split(';')
+        if len(parts) == 1:
+            target_spec = parts[0]
+            existing_spec = None
+        elif len(parts) == 2:
+            target_spec, existing_spec = parts
+        else:
+            raise ParseError("Only 1 ';' allowed")
+
+        target_item_amounts = parse_spec(target_spec)
+        if existing_spec is not None:
+            existing_item_amounts = parse_spec(existing_spec)
+        else:
+            existing_item_amounts = []
+    except ParseError as e:
+        print("Invalid item specification")
+        print(e)
+        return
+
+    for amount, item in existing_item_amounts:
+        calculator.add_existing_item(item, amount)
+    for amount, item in target_item_amounts:
+        calculator.make_item(item, amount)
+    print(format_calculator_result(calculator))
+    calculator.reset()
+
+
+
 def main():
     import argparse
 
@@ -316,91 +393,31 @@ def main():
             break
 
         if command == "ls" or command == "list" or command == "items":
-            print("\n".join(str(item) for item in Item.item_list))
+            command_ls()
             print()
             continue
 
         if command == "?" or command == "help":
-            print(help_msg)
+            command_help()
             print()
             continue
 
         if command == "recipes":
-            for recipe in all_recipes:
-                print(format_recipe(recipe))
+            command_recipes(all_recipes)
             print()
             continue
 
         if command == "setoptional":
-            print("\n".join([item.name for item in optional_recipe_items]))
-            item = None
-            item_name = read_command("Select item: ")
-            if item_name is None:
-                print()
-                continue
-            item = Item.get_from(item_name)
-            if item is None:
-                print(f"Could not find {item_name}")
-                print()
-                continue
-
-            available_recipes = item_recipe_map[item]
-            print("\n".join(f"{i}: {format_recipe(recipe)}" for i, recipe in enumerate(available_recipes)))
-            selection = read_command("Select recipe nr: ")
-            if selection is None:
-                print()
-                continue
-            try:
-                selection_index = int(selection)
-            except ValueError:
-                print("That is not a number")
-                continue
-            if selection_index > len(available_recipes) - 1 or selection_index < 0:
-                print("That recipe doesnt exist")
-                continue
-
-            calculator.set_item_recipe(item, available_recipes[selection_index])
+            command_setoptional(optional_recipe_items, item_recipe_map, calculator)
             print()
             continue
 
         if command == "showoptional":
-            for item in optional_recipe_items:
-                recipe = calculator.get_item_recipe(item)
-                print(f"{item.name}: {format_recipe(recipe)}")
+            command_showoptional(optional_recipe_items, calculator)
             print()
             continue
         
-        item_spec = command
-
-        def parse_spec(spec) -> List[ItemAmount]:
-            return [parse_item_amount(token, allow_create=False) for token in spec.split('+')]
-
-        try:
-            parts = item_spec.split(';')
-            if len(parts) == 1:
-                target_spec = parts[0]
-                existing_spec = None
-            elif len(parts) == 2:
-                target_spec, existing_spec = parts
-            else:
-                raise ParseError("Only 1 ';' allowed")
-
-            target_item_amounts = parse_spec(target_spec)
-            if existing_spec is not None:
-                existing_item_amounts = parse_spec(existing_spec)
-            else:
-                existing_item_amounts = []
-        except ParseError as e:
-            print("Invalid item specification")
-            print(e)
-            continue
-
-        for amount, item in existing_item_amounts:
-            calculator.add_existing_item(item, amount)
-        for amount, item in target_item_amounts:
-            calculator.make_item(item, amount)
-        print(format_calculator_result(calculator))
-        calculator.reset()
+        command_calculate(command, calculator)
         print()
 
 
