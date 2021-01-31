@@ -7,7 +7,7 @@ siliconore;2; siliconvein
 titaniumore;2; titaniumvein
 oil;1;oilwell
 water;2;waterpump
-fireice;1;fireice
+fireice;2;fireicevein
 spiniformstalagmitecrystal;2;spiniformstalagmitecystalvein
 opticalgratingcrystal;2;opticalgratingcrystalvein
 kimberliteore;2;kimberlitevein
@@ -88,3 +88,9 @@ organiccrystal;2;organiccrystalvein
 photoncombiner;3;assembler;opticalgratingcrystal;circuitboard
 diamond;2;smelter;kimberliteore
 particlecontainer;10;assembler;10,unipolarmagnet;2,copperingot
+
+# orbital collection
+# not sure if the rates are planet dependent (they probably are)
+# so you have to divide the output by the planets rate
+fireice;0.125;orbitalcollector
+hydrogen;0.125;orbitalcollector
