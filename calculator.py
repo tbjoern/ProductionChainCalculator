@@ -206,7 +206,6 @@ class Calculator:
         return any(self.additional_items)
 
     def _iter_item_list(self, item_counts: List[int]) -> List[str]:
-        lines = []
         max_item_level = max(self.item_hierarchy)
         buckets = [[] for _ in range(max_item_level+1)]
         for item, amount in enumerate(item_counts):
@@ -215,12 +214,11 @@ class Calculator:
                 buckets[item_level].append(ItemAmount(amount, item))
         for level, bucket in enumerate(buckets):
             if len(bucket) > 0 and level > 0:
-                lines.append("")
+                yield None
             for amount, item in bucket:
                 if amount > 0:
                     recipe = self.recipes[item]
                     yield item, amount, recipe
-            yield None
 
 def format_calculator_result(calculator: Calculator, item_lookup: ItemLookup):
     lines = []
@@ -233,7 +231,7 @@ def format_calculator_result(calculator: Calculator, item_lookup: ItemLookup):
         factory = recipe.factory
         items_per_second_per_factory = recipe.get_amount(item) / recipe.time
         factories_needed = amount / items_per_second_per_factory
-        lines.append(f"{item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3g} {factory}")
+        lines.append(f"{item_lookup.name_for(item):<16}: {float(amount): >4g}/s - {factories_needed: >3.3g} {factory}")
 
     if calculator.has_additional_items():
         lines.append("Additional products:")
@@ -355,6 +353,7 @@ def main():
                 continue
             if selection_index > len(available_recipes) - 1 or selection_index < 0:
                 print("That recipe doesnt exist")
+                continue
 
             calculator.set_item_recipe(item, available_recipes[selection_index])
             print()
