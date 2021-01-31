@@ -165,6 +165,9 @@ class Calculator:
     def _make_item_list(self):
         return [0 for _ in range(self.item_count)]
 
+    def add_existing_item(self, item, amount):
+        self.additional_items[item] += amount
+
     def make_item(self, item, amount, level=0):
         self.item_tracker[item] += amount
         self.item_hierarchy[item] = max(self.item_hierarchy[item], level)
@@ -366,15 +369,38 @@ def main():
         
         item_spec = command
 
+        def parse_spec(spec):
+            tokens = spec.split('+')
+            item_amounts = [ItemAmount.resolve(*parse_item_amount(token)) for token in tokens]
+            for i, item_amount in enumerate(item_amounts):
+                if item_amount.item is None:
+                    raise ParseError(f"Item not found: {tokens[i]}")
+            return item_amounts
+
         try:
-            item_amounts = [ItemAmount.resolve(*parse_item_amount(token)) for token in item_spec.split('+')]
+            parts = item_spec.split(';')
+            if len(parts) == 1:
+                target_spec = parts[0]
+                existing_spec = None
+            elif len(parts) == 2:
+                target_spec, existing_spec = parts
+            else:
+                raise ParseError("Only 1 ';' allowed")
+
+            target_item_amounts = parse_spec(target_spec)
+            if existing_spec is not None:
+                existing_item_amounts = parse_spec(existing_spec)
+            else:
+                existing_item_amounts = []
         except ParseError as e:
-            print("Invalid item format")
+            print("Invalid item specification")
             print(e)
             continue
 
-        for item_amount in item_amounts:
-            calculator.make_item(item_amount.item, item_amount.amount)
+        for amount, item in existing_item_amounts:
+            calculator.add_existing_item(item, amount)
+        for amount, item in target_item_amounts:
+            calculator.make_item(item, amount)
         print(format_calculator_result(calculator, item_lookup))
         calculator.reset()
         print()
