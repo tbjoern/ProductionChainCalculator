@@ -95,6 +95,8 @@ yellowscience 1/s - 8 matrix
 - Optional recipe support -> select which recipe to use if there are multiple
 - Shows total amount of needed production facilities 
 - Show a tree view of which items need which subitems and so on
+- Display ingredients of each item in summary view, to plan isolated modules
+- Customizable output, toggle treeview, summary, total factory count etc
 
 ### Wishlist
 
