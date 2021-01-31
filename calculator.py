@@ -305,7 +305,7 @@ def format_summary(nodes, calculator: Calculator, show_ingredients=False):
             for ingredient, amount in ingredient_counts.items():
                 recipe = calculator.get_item_recipe(ingredient)
                 factory = recipe.factory
-                factory_count = calculate_factory_count(ingredient, recipe, amount)
+                factories_needed = calculate_factory_count(ingredient, recipe, amount)
                 lines.append(f"  {ingredient.name:<16}: {float(amount): >4g}/s - {factories_needed: >3.3g} {factory}")
 
     if calculator.has_additional_items():
