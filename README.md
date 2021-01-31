@@ -51,6 +51,7 @@ refinedoil      :    3/s
 - Prints a summary of how many items need to be produced per second, and calculates how many production facilities are needed
 - Takes into account recipes with multiple outputs and shows surplus production
 - Optional recipe support -> select which recipe to use if there are multiple
+- Shows total amount of needed production facilities 
 
 ### Wishlist
 
@@ -60,7 +61,6 @@ Roughly in order of priority
 - Circular dependencies 
     For Oil cracking recipes
 - Different time formats (items per min, hour etc)
-- Print total amount of needed production facilities 
 - Complete resource file for Dyson Sphere Program
 - Resource files for other games (factorio, satisfactory)
 - Inverse calculator: Given some input resources, how many can I make of the requested products?

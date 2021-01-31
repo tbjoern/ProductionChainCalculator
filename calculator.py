@@ -227,7 +227,8 @@ class Calculator:
 
 def format_calculator_result(calculator: Calculator):
     lines = []
-    lines.append("Required products:")
+    lines.append("--- Required products ---")
+    factories = {}
     for result in calculator.get_required_items():
         if result is None:
             lines.append("")
@@ -236,10 +237,17 @@ def format_calculator_result(calculator: Calculator):
         factory = recipe.factory
         items_per_second_per_factory = recipe.get_amount(item) / recipe.time
         factories_needed = amount / items_per_second_per_factory
+        if not factory in factories:
+            factories[factory] = 0
+        factories[factory] += factories_needed
         lines.append(f"{item.name:<16}: {float(amount): >4g}/s - {factories_needed: >3.3g} {factory}")
 
+    lines.append("--- Needed factories ---")
+    for factory, count in factories.items():
+        lines.append(f"{factory:<16}: {count: >3.3g}")
+
     if calculator.has_additional_items():
-        lines.append("Additional products:")
+        lines.append("--- Additional products ---")
         for result in calculator.get_additional_items():
             if result is None:
                 continue
