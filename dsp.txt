@@ -55,17 +55,24 @@ processor;3;assembler;2,circuitboard;2,component
 titaniumcrystal;4;assembler;organiccrystal;3,titaniumingot
 4,titaniumalloy;12;smelter;4,titaniumingot;4,steel;8,sulfuricacid
 2,nanotube;4;chemicalplant;3,graphene;titaniumingot
+2,titaniumglass;5;assembler;2,glass;2,titaniumingot;2,water
 
 # advanced materials
 particlecontainer;4;assembler;2,turbine;2,copperingot;2,graphene
 particlebroadband;8;assembler;2,nanotube;2,crystalsilicon;plastic
+framematerial;6;assembler;4,nanotube;titaniumalloy;siliconingot
+casimircrystal;4;assembler;titaniumcrystal;2,graphene;12,hydrogen
 
 strangematter;8;particlecollider;2,particlecontainer;2,ironingot;10,deuterium
 gravitonlens;6;assembler;4,diamond;strangematter
 spacewarper;10;assembler;gravitonlens
+quantumchip;6;assembler;2,processor;2,planefilter
 
 # products
+deuteronfuelrod;6;titaniumalloy;10,deuterium;supermagneticring
 2,solarsail;4;assembler;graphene;photoncombiner
+dysonspherecomponent;8;assembler;3,framematerial;3,solarsail;3,processor
+smallcarrierrocket;6;assembler;2,dysonspherecomponent;2,deuteronfuelrod;2,quantumchip
 
 # science
 bluescience;3;matrix;magneticcoil;circuitboard
