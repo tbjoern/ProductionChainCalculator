@@ -66,6 +66,7 @@ casimircrystal;4;assembler;titaniumcrystal;2,graphene;12,hydrogen
 strangematter;8;particlecollider;2,particlecontainer;2,ironingot;10,deuterium
 gravitonlens;6;assembler;4,diamond;strangematter
 spacewarper;10;assembler;gravitonlens
+planefilter;12;assembler;casimircrystal;2,titaniumglass
 quantumchip;6;assembler;2,processor;2,planefilter
 
 # products
