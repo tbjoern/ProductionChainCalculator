@@ -80,6 +80,7 @@ bluescience;3;matrix;magneticcoil;circuitboard
 redscience;6;matrix;2,graphite;2,hydrogen
 yellowscience;8;matrix;diamond;titaniumcrystal
 purplescience;10;matrix;particlebroadband;2,processor
+2,greenscience;24;matrix;gravitonlens;quantumchip
 
 # optional recipes
 2,graphene+1,hydrogen;2;chemicalplant;2,fireice
@@ -88,6 +89,7 @@ organiccrystal;2;organiccrystalvein
 photoncombiner;3;assembler;opticalgratingcrystal;circuitboard
 diamond;2;smelter;kimberliteore
 particlecontainer;10;assembler;10,unipolarmagnet;2,copperingot
+8,spacewarper;10;matrix;greenscience
 
 # orbital collection
 # not sure if the rates are planet dependent (they probably are)
