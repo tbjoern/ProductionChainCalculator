@@ -1,7 +1,7 @@
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Tuple, Sequence, Optional
+from typing import Dict, List, Tuple, Sequence, Optional, Any
 import logging
 import math
 import readline
@@ -152,6 +152,20 @@ def build_item_recipe_map(recipes: List[Recipe]) -> Dict[Item, List[Recipe]]:
             item_recipe_map[item].append(recipe)
     return item_recipe_map
 
+@dataclass
+class Node:
+    data: Any
+    children: List[Node] = field(default_factory=list)
+
+    def add_child(self, child: Node):
+        self.children.append(child)
+
+    def traverse(self, level=0):
+        """pre-order traversal"""
+        yield (self, level)
+        for child in self.children:
+            yield from child.traverse(level=level+1)
+
 class Calculator:
     def __init__(self, item_count: int):
         self.item_count = item_count
@@ -173,7 +187,9 @@ class Calculator:
     def add_existing_item(self, item, amount):
         self.additional_items[item.id] += amount
 
-    def make_item(self, item: Item, amount: int, level=0):
+    def make_item(self, item: Item, amount: int, level=0) -> Node:
+        node = Node(data=ItemAmount(amount, item))
+
         self.item_tracker[item.id] += amount
         self.item_hierarchy[item.id] = max(self.item_hierarchy[item.id], level)
 
@@ -182,19 +198,22 @@ class Calculator:
         amount = max(amount, 0)
 
         if not item in self.recipes:
-            logger.warning(f"Could not find a recipe for item {item}")
-            return
+            raise RuntimeError(f"Could not find a recipe for item {item}")
+
         recipe = self.recipes[item]
         recipe_yield = recipe.get_amount(item)
         assert recipe_yield is not None
 
         times_recipe_needed = float(amount) / recipe_yield
         for ingredient in recipe.ingredients:
-            self.make_item(ingredient.item, ingredient.amount * times_recipe_needed, level=level+1)
+            childnode = self.make_item(ingredient.item, ingredient.amount * times_recipe_needed, level=level+1)
+            node.add_child(childnode)
 
         for result in recipe.results:
             if item != result.item:
                 self.additional_items[result.item.id] += times_recipe_needed * result.amount
+
+        return node
 
     def reset(self):
         self.item_tracker = self._make_item_list()
@@ -268,6 +287,21 @@ def format_recipe(recipe: Recipe) -> str:
     tokens += ["->"]
     tokens += [" + ".join(format_item_amount(result) for result in recipe.results)]
     return " ".join(tokens)
+
+def format_nodes(nodes: List[Node], calculator):
+    lines = []
+    lines.append("--- Tree View ---")
+    for start in nodes:
+        for node, level in start.traverse():
+            amount, item = node.data
+            if amount == 0:
+                continue
+            recipe = calculator.get_item_recipe(item)
+            factory = recipe.factory
+            items_per_second_per_factory = recipe.get_amount(item) / recipe.time
+            factories_needed = amount / items_per_second_per_factory
+            lines.append(f"{'  ' * level}{item.name} {float(amount):g}/s - {factories_needed:g} {factory}")
+    return '\n'.join(lines)
 
 
 help_msg="""Usage:
@@ -361,12 +395,13 @@ def command_calculate(item_spec, calculator):
 
     for amount, item in existing_item_amounts:
         calculator.add_existing_item(item, amount)
+    nodes = []
     for amount, item in target_item_amounts:
-        calculator.make_item(item, amount)
+        node = calculator.make_item(item, amount)
+        nodes.append(node)
     print(format_calculator_result(calculator))
+    print(format_nodes(nodes, calculator))
     calculator.reset()
-
-
 
 def main():
     import argparse
