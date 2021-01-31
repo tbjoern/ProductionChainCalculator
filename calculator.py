@@ -56,7 +56,7 @@ class ItemAmount:
     item: Item
 
     def __repr__(self):
-        return f"ItemAmount(amount={self.amount}, item={item.name})"
+        return f"ItemAmount(amount={self.amount}, item={self.item.name})"
 
     def __iter__(self):
         return iter((self.amount, self.item))
@@ -166,6 +166,11 @@ class Node:
         for child in self.children:
             yield from child.traverse(level=level+1)
 
+    def find(self, filter_function):
+        for node, level in self.traverse():
+            if filter_function(node.data):
+                yield node
+
 class Calculator:
     def __init__(self, item_count: int):
         self.item_count = item_count
@@ -244,7 +249,34 @@ class Calculator:
                     recipe = self.recipes[item]
                     yield item, amount, recipe
 
-def format_calculator_result(calculator: Calculator):
+
+# Output formatting
+
+def format_bool(b):
+    return 'on' if b else 'off'
+
+@dataclass
+class FormatOptions:
+    show_ingredients: bool = False
+    treeview: bool = False
+
+    def __str__(self):
+        return "\n".join([
+            f"Show ingredients: {format_bool(self.show_ingredients)}",
+            f"Treeview        : {format_bool(self.treeview)}"
+        ])
+
+@dataclass
+class CalculatorResult:
+    nodes: List[Node]
+    calculator: Calculator
+
+def calculate_factory_count(item, recipe, amount):
+    items_per_second_per_factory = recipe.get_amount(item) / recipe.time
+    factories_needed = amount / items_per_second_per_factory
+    return factories_needed
+
+def format_summary(nodes, calculator: Calculator, show_ingredients=False):
     lines = []
     lines.append("--- Required products ---")
     factories = {}
@@ -254,12 +286,27 @@ def format_calculator_result(calculator: Calculator):
             continue
         item, amount, recipe = result
         factory = recipe.factory
-        items_per_second_per_factory = recipe.get_amount(item) / recipe.time
-        factories_needed = amount / items_per_second_per_factory
+        factories_needed = calculate_factory_count(item, recipe, amount)
         if not factory in factories:
             factories[factory] = 0
         factories[factory] += factories_needed
         lines.append(f"{item.name:<16}: {float(amount): >4g}/s - {factories_needed: >3.3g} {factory}")
+
+        if show_ingredients:
+            ingredient_counts = {}
+            for root_node in nodes:
+                for item_node in root_node.find(lambda item_amount: item_amount.item == item):
+                    for node in item_node.children:
+                        amount, ingredient = node.data
+                        if ingredient not in ingredient_counts:
+                            ingredient_counts[ingredient] = 0
+                        ingredient_counts[ingredient] += amount
+
+            for ingredient, amount in ingredient_counts.items():
+                recipe = calculator.get_item_recipe(ingredient)
+                factory = recipe.factory
+                factory_count = calculate_factory_count(ingredient, recipe, amount)
+                lines.append(f"  {ingredient.name:<16}: {float(amount): >4g}/s - {factories_needed: >3.3g} {factory}")
 
     lines.append("--- Needed factories ---")
     for factory, count in factories.items():
@@ -290,7 +337,7 @@ def format_recipe(recipe: Recipe) -> str:
     tokens += [f" {recipe.factory}"]
     return " ".join(tokens)
 
-def format_nodes(nodes: List[Node], calculator):
+def format_as_tree(nodes: List[Node], calculator: Calculator):
     lines = []
     lines.append("--- Tree View ---")
     for start in nodes:
@@ -300,10 +347,16 @@ def format_nodes(nodes: List[Node], calculator):
                 continue
             recipe = calculator.get_item_recipe(item)
             factory = recipe.factory
-            items_per_second_per_factory = recipe.get_amount(item) / recipe.time
-            factories_needed = amount / items_per_second_per_factory
+            factories_needed = calculate_factory_count(item, recipe, amount)
             lines.append(f"{'  ' * level}{item.name} {float(amount):g}/s - {factories_needed:g} {factory}")
     return '\n'.join(lines)
+
+def format_result(result: CalculatorResult, format_options: FormatOptions):
+    if format_options.treeview:
+        return format_as_tree(result.nodes, result.calculator)
+    else:
+        return format_summary(result.nodes, result.calculator, show_ingredients=format_options.show_ingredients)
+        
 
 
 help_msg="""Usage:
@@ -371,7 +424,7 @@ def command_setoptional(optional_recipe_items, item_recipe_map, calculator):
 
     calculator.set_item_recipe(item, available_recipes[selection_index])
 
-def command_calculate(item_spec, calculator):
+def command_calculate(item_spec, calculator) -> CalculatorResult:
     def parse_spec(spec) -> List[ItemAmount]:
         return [parse_item_amount(token, allow_create=False) for token in spec.split('+')]
 
@@ -395,15 +448,14 @@ def command_calculate(item_spec, calculator):
         print(e)
         return
 
+    calculator.reset()
     for amount, item in existing_item_amounts:
         calculator.add_existing_item(item, amount)
     nodes = []
     for amount, item in target_item_amounts:
         node = calculator.make_item(item, amount)
         nodes.append(node)
-    print(format_calculator_result(calculator))
-    print(format_nodes(nodes, calculator))
-    calculator.reset()
+    return CalculatorResult(nodes, calculator)
 
 def main():
     import argparse
@@ -432,6 +484,9 @@ def main():
     for item, recipes in item_recipe_map.items():
         if len(recipes) > 1:
             optional_recipe_items.append(item)
+
+    format_options = FormatOptions()
+    last_result = None
     
     while True:
         command = read_command("Items to produce/s (amount,item + ...): ")
@@ -452,9 +507,23 @@ def main():
 
         elif command == "showoptional":
             command_showoptional(optional_recipe_items, calculator)
+
+        elif command == "tree" or command == "treeview":
+            format_options.treeview = not format_options.treeview
+            print(format_options)
+            if last_result is not None:
+                print(format_result(last_result, format_options))
+
+        elif command == "expand" or command == "showingredients":
+            format_options.show_ingredients = not format_options.show_ingredients
+            print(format_options)
+            if last_result is not None:
+                print(format_result(last_result, format_options))
         
         else:
-            command_calculate(command, calculator)
+            result = command_calculate(command, calculator)
+            print(format_result(result, format_options))
+            last_result = result
 
         print()
 
