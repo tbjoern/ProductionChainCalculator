@@ -28,6 +28,7 @@ magnet;1.5;smelter;ironore
 plastic;3;chemicalplant;2,refinedoil;graphite
 2,graphene;3;chemicalplant;3,graphite;sulfuricacid
 organiccrystal;6;chemicalplant;2,plastic;refinedoil;water
+3,deuterium;10;fractionator;3,hydrogen
 
 
 # basic materials
@@ -38,21 +39,30 @@ glass;2;smelter;2,stoneore
 diamond;2;smelter;graphite
 crystalsilicon;1;smelter;siliconingot
 
-# advanced materials
+# intermediate materials
 2,magneticcoil;1;assembler;2,magnet;copperingot
 2,circuitboard; 1; assembler;ironingot;copperingot
 plasmaexiter;2;assembler;4,magneticcoil;2,prism
+photoncombiner;3;assembler;2,prism;circuitboard
+
 motor;2;assembler;2,ironingot;gear;magneticcoil
-component;2;assembler;2,siliconingot;copperingot
-processor;3;assembler;2,circuitboard;2,component
 turbine;2;assembler;2,motor;2,magneticcoil
 supermagneticring;3;assembler;2,turbine;3,magnet;graphite
+
+component;2;assembler;2,siliconingot;copperingot
+processor;3;assembler;2,circuitboard;2,component
+
 titaniumcrystal;4;assembler;organiccrystal;3,titaniumingot
-photoncombiner;3;assembler;2,prism;circuitboard
-particlecontainer;4;assembler;2,turbine;2,copperingot;2,graphene
 4,titaniumalloy;12;smelter;4,titaniumingot;4,steel;8,sulfuricacid
-particlebroadband;8;assembler;2,nanotube;2,crystalsilicon;plastic
 2,nanotube;4;chemicalplant;3,graphene;titaniumingot
+
+# advanced materials
+particlecontainer;4;assembler;2,turbine;2,copperingot;2,graphene
+particlebroadband;8;assembler;2,nanotube;2,crystalsilicon;plastic
+
+strangematter;8;particlecollider;2,particlecontainer;2,ironingot;10,deuterium
+gravitonlens;6;assembler;4,diamond;strangematter
+spacewarper;10;assembler;gravitonlens
 
 # products
 2,solarsail;4;assembler;graphene;photoncombiner
