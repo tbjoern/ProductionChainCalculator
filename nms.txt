@@ -1,0 +1,66 @@
+# plants
+25,mordite;1;plant
+50,fungal mould;1;plant
+25,faecium;1;plant
+50,gamma root;1;plant
+50,frost crystal;1;plant
+25,star bulb;1;plant
+50,cactus flesh;1;plant
+50,solanium;1;plant
+
+# gases
+250,sulphurine;1;gas
+250,nitrogen;1;gas
+250,radon;1;gas
+250,oxygen;1;gas
+250,dioxite;1;gas
+
+# materials
+5,condensed carbon;1;refiner;2,oxygen
+ionised cobalt;1;mining
+pure ferrite;1;mining
+paraffinum;1;mining
+uranium;1;mining
+phosphorus;1;mining
+pyrite;1;mining
+ammonia;1;mining
+
+
+# plant based trading items
+acid;1;hand;25,mordite;600,fungal mould
+lubricant;1;hand;50,faecium;400,gamma root
+unstable gel;1;hand;200,cactus flesh
+glass;1;hand;40,frost crystal
+poly fibre;1;hand;100,cactus flesh;200,star bulb
+liquid explosive;1;hand;acid;unstable gel
+living glass;1;hand;lubricant;glass
+heat capacitor;1;hand;100,frost crystal;200,solanium
+circuit board;1;hand;heat capacitor;poly fibre
+
+# gas based trading items
+thermic condensate;1;hand;250,sulphurine;50,condensed carbon
+enriched carbon;1;hand;250,radon;50,condensed carbon
+nitrogen salt;1;hand;250,nitrogen;50,condensed carbon
+organic catalyst;1;hand;thermic condensate;enriched carbon
+semiconductor;1;hand;thermic condensate;nitrogen salt
+hot ice;1;hand;enriched carbon;nitrogen salt
+fusion accelerant;1;hand;organic catalyst;nitrogen salt
+superconductor;1;hand;semiconductor;enriched carbon
+cryo pump;1;hand;hot ice;thermic condensate
+
+# element based trading items
+aronium;1;hand;50,paraffinum;50,ionised cobalt
+dirty bronze;1;hand;50,pyrite;100,pure ferrite
+herox;1;hand;50,ammonia;50,ionised cobalt
+lemmium;1;hand;50,uranium;100,pure ferrite
+magno gold;1;hand;50,phosphorus;50,ionised cobalt
+gratine;1;hand;50,dioxite;50,ionised cobalt
+iridesite;1;hand;aronium;magno gold;gratine
+geodesite;1;hand;dirty bronze;herox;lemmium
+
+# high level
+portable reactor;1;hand;liquid explosive;fusion accelerant
+quantum processor;1;hand;circuit board;superconductor
+cryogenic chamber;1;hand;living glass;cryo pump
+fusion ignitor;1;hand;portable reactor;quantum processor;geodesite
+stasis device;1;hand;quantum processor;cryogenic chamber;iridesite
