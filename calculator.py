@@ -3,8 +3,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Tuple, Sequence, Optional, Any
 import logging
-import math
-import readline
+import sys
+if sys.platform != 'win32':
+    import readline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.INFO)
@@ -137,8 +138,8 @@ def load_recipes(filename: Path, parser) -> List[Recipe]:
 
                 recipes.append(Recipe(results, ingredients, time, factory))
         except ParseError as e:
-            parser.error("Parse error in {filename}:{i} - {e}")
-    
+            parser.error(f"Parse error in {filename}:{i} - {e}")
+
     print(f"Sucessfully loaded {filename.name}")
     return recipes
 
@@ -179,7 +180,7 @@ class Calculator:
         self.additional_items = None
         self.item_hierarchy = None
         self.reset()
-    
+
     def set_item_recipe(self, item: Item, recipe: Recipe):
         self.recipes[item] = recipe
 
@@ -198,7 +199,7 @@ class Calculator:
         self.item_tracker[item.id] += amount
         self.item_hierarchy[item.id] = max(self.item_hierarchy[item.id], level)
 
-        amount = amount - self.additional_items[item.id] 
+        amount = amount - self.additional_items[item.id]
         self.additional_items[item.id] = max(0, -amount)
         amount = max(amount, 0)
 
@@ -506,7 +507,7 @@ def main():
 
     format_options = FormatOptions()
     last_result = None
-    
+
     while True:
         command = read_command("Items to produce/s (amount,item + ...): ")
         if command is None:
@@ -550,7 +551,7 @@ def main():
             print(format_options)
             if last_result is not None:
                 print(format_result(last_result, format_options))
-        
+
         else:
             result = command_calculate(command, calculator)
             print(format_result(result, format_options))
