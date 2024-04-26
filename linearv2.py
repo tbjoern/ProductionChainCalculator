@@ -1,11 +1,58 @@
+"""
+Production Chain LinProg
+
+given things t1 .. tn
+and recipes r1 ... rm
+
+each recipe consumes some things and produces some things
+the amount of ti produced or consumed by rj is defined as rj_ti, with rj_ti > 0 when rj produces ti and rj_ti < 0 when rj consumes ti
+
+let c_ri define how often recipe ri is used, c_ri >= 0
+
+lets also P_ti define how much of ti is available
+let R_ti define how much of ti is required
+
+for all i, we can assert that
+
+P_ti - R_ti + (for all j in i..m): rj_ti * c_rj >= 0
+
+P_ti and R_ti are constants, therefore
+
+(for all j in i..m): rj_ti * c_rj >= R_ti - P_ti
+
+reformulating this as a matrix:
+
+A_ij = -rj_ti
+cv_i = c_ri
+b_i = P_ti - R_ti
+
+
+A * cv <= b
+0 <= cv
+
+minimizing sum(cv_i)
+
+Caveats:
+Every thing needs a recipe rj that produces it.
+For inputs that means we need a placeholder recipe which 'produces' only that input and has an optimization weight of 0.
+Each run will use a subset of the recipes for optimization. We need to figure out which items are pure inputs, which are all things that are inputs and not simultaneously outputs.
+This also allows the user to specify that some items are pure inputs, even when a factory produces them (e.g. as a side product)
+
+
+TODO: update this text with the output recipes. Generate an output recipe and use equality instead of <=. Then optimizer is forced to balance overproduction with output recipe, allowing us to
+- mimize overproduction by using 1 as optimization weight
+- ignore overproduction by using 0
+- encourage overproduction (maximize given the inputs) by using -1
+"""
+
 from scipy.optimize import linprog
 from dataclasses import dataclass
 
 
 @dataclass
 class Recipe:
-    inputs: dict[tuple[int, str]]
-    outputs: dict[tuple[int, str]]
+    inputs: dict[str, int]
+    outputs: dict[str, int]
 
     def get_input_count(self, input) -> int:
         return self.inputs.get(input, 0)
@@ -37,7 +84,7 @@ recipes = {
 
 
 def produce_required_items(
-    recipes: dict[str, int],
+    recipes: dict[str, Recipe],
     require: dict[str, int] = {},
     maximize: list[str] = [],
     provide: dict[str, int] = {},
@@ -122,39 +169,30 @@ def produce_required_items(
         if recipe in pure_inputs:
             # dont optimize for "pure input recipes" - take as many as is required
             c.append(0)
-        else:
-            # maximize means produce as many as possible
-            # this must be used in combination with limit, otherwise there is no solution
-            for output in used_recipes[recipe].outputs:
-                if output in maximize:
-                    c.append(-1)
-                    break
+        elif recipe in output_recipes:
+            item = list(used_recipes[recipe].inputs.keys())[0]
+            if item in maximize:
+                c.append(-1)
+            elif item in ignore:
+                c.append(0)
             else:
-                for input in used_recipes[recipe].inputs:
-                    # only minimize recipes that use a pure input
-                    # or if specified an optimization target
-                    if input in optimize_for or (
-                        input in pure_inputs and input not in ignore
-                    ):
-                        # minimize amount of recipes used
-                        c.append(1)
-                        break
-                else:
-                    c.append(0)
+                c.append(1)
+        else:
+            c.append(0)
 
     print(b_ub)
     print(c)
-    result = linprog(c, A_ub=A_ub, b_ub=b_ub)
+    result = linprog(c, A_eq=A_ub, b_eq=b_ub)
     print(result)
 
     if result.success:
         for recipe_count, (recipe_name, recipe) in zip(result.x, used_recipes.items()):
             inputs = []
             for input_name, input_count in recipe.inputs.items():
-                inputs.append(f"{input_count * recipe_count:.0f} x {input_name}")
+                inputs.append(f"{input_count * recipe_count:.1f} x {input_name}")
             outputs = []
             for output_name, output_count in recipe.outputs.items():
-                outputs.append(f"{output_count * recipe_count:.0f} x {output_name}")
+                outputs.append(f"{output_count * recipe_count:.1f} x {output_name}")
             print(
                 f"{recipe_count:.1f} x {recipe_name}: {' + '.join(inputs)} --> {' + '.join(outputs)}"
             )
@@ -178,4 +216,41 @@ produce_required_items(
     },
     maximize=["petroleum-gas"],
     limit={"water": 1000},
+)
+
+produce_required_items(
+    recipes={
+        "advanced-oil-processing": Recipe(
+            inputs={"crude-oil": 100, "water": 50},
+            outputs={"heavy-oil": 25, "light-oil": 45, "petroleum-gas": 55},
+        ),
+        "light-oil-cracking": Recipe(
+            inputs={"light-oil": 30, "water": 30}, outputs={"petroleum-gas": 20}
+        ),
+        "heavy-oil-cracking": Recipe(
+            inputs={"heavy-oil": 40, "water": 30}, outputs={"light-oil": 30}
+        ),
+    },
+    require={"petroleum-gas": 110},
+    ignore=["water"],
+)
+
+produce_required_items(
+    recipes={
+        "copper-smelting": Recipe(
+            inputs={"copper-ore": 1}, outputs={"copper-plate": 1}
+        ),
+        "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
+        "copper-wire-assembly": Recipe(
+            inputs={"copper-plate": 1}, outputs={"copper-wire": 2}
+        ),
+        "electronic-circuits-assembly": Recipe(
+            inputs={"iron-plate": 1, "copper-wire": 3},
+            outputs={"electronic-circuit": 1},
+        ),
+    },
+    provide={"iron-plate": 15, "copper-plate": 10},
+    limit={"iron-plate": 0},
+    maximize=["electronic-circuit"],
+    require={"gear": 2},
 )
