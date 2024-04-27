@@ -1,5 +1,0 @@
-18 iron + 18 wood + 24 concrete --> 24 construction-parts
-24 molten-iron --> 24 iron
-36 iron-ore-crushed + 3 limestone + 15 coal --> 48 molten-iron + 18 slag + 36 exhaust
-36 iron-ore --> 36 iron-ore-crushed
-

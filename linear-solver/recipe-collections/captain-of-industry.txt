@@ -1,0 +1,41 @@
+# line        = recipe | whitespace | comment
+# comment     = '#' [ text ]
+# recipe      = item-list ';' time ';' factory ';' ingredients
+# item-list   = item [ '+' item-list ]
+# ingredients = item [ ';' ingredients ]
+# item        = [ number ',' ] text
+
+
+24 molten-iron --> 24 iron ; time: 60.0, factory: metal-caster-2
+#24,molten-iron+12,slag+24,exhaust;60;blast-furnace;24,iron-ore;9,coal
+36 iron-ore-crushed + 3 limestone + 15 coal --> 48 molten-iron + 18 slag + 36 exhaust ; time: 60.0, factory: blast-furnace-2
+36 iron-ore --> 36 iron-ore-crushed ; time: 60.0, factory: crusher
+
+24 impure-copper + 6 acid --> 24 copper ; time: 60.0, factory: copper-electrolysis
+24 molten-copper --> 24 impure-copper ; time: 60.0, factory: metal-caster-2
+36 copper-ore-crushed + 6 sand + 15 coal --> 48 molten-copper + 18 slag + 36 exhaust ; time: 60.0, factory: blast-furnace-2
+36 copper-ore --> 36 copper-ore-crushed ; time: 60.0, factory: crusher
+30 water + 6 sulfur --> 36 acid ; time: 60.0, factory: mixer
+24 molten-steel + 12 water --> 24 steel ; time: 60.0, factory: cooled-caster-2
+48 molten-iron + 18 oxygen --> 24 molten-steel + 36 exhaust ; time: 60.0, factory: oxygen-furnace-2
+48 molten-glass --> 72 glass ; time: 60.0, factory: glass-maker-2
+48 glass-mix + 15 coal --> 48 molten-glass + 12 slag + 36 exhaust ; time: 60.0, factory: blast-furnace-2
+48 sand + 12 limestone + 12 salt + 12 acid --> 48 glass-mix ; time: 60.0, factory: mixer
+
+ --> 36 oxygen + 36 nitrogen ; time: 60.0, factory: air-separator
+
+12 steel --> 24 mechanical-parts ; time: 60.0, factory: assembly-3
+24 copper + 6 rubber --> 24 electronics ; time: 60.0, factory: assembly-3
+12 iron + 6 mechanical-parts + 6 electronics --> 12 vehicle-parts ; time: 60.0, factory: assembly-3
+6 vehicle-parts + 3 steel + 3 glass --> 6 vehicle-parts-2 ; time: 60.0, factory: assembly-3
+
+# concrete
+
+18 limestone + 6 hydrogen --> 6 cement + 12 CO2 ; time: 60.0, factory: rotary-kiln-gas
+36 gravel + 12 sand + 24 water + 6 cement --> 48 concrete ; time: 60.0, factory: concrete-mixer-3
+144 slag --> 144 slag-crushed ; time: 60.0, factory: crusher-large
+
+18 iron + 18 wood + 24 concrete --> 24 construction-parts ; time: 60.0, factory: assembly-3
+24 construction-parts + 12 electronics --> 12 construction-parts-2 ; time: 60.0, factory: assembly-3
+
+
