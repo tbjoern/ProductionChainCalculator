@@ -4,90 +4,93 @@ from calculator.recipe import Recipe
 
 
 def test_basic():
+    recipes = {"gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1})}
     result = produce_required_items(
-        recipes={
-            "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1})
-        },
+        recipes=recipes.values(),
         require={"gear": 2},
     )
 
     assert result.solvable
-    assert result.recipe_count["gear-assembly"] == 2
+    assert result.recipe_count[recipes["gear-assembly"]] == 2
     assert result.consumed == {"iron-plate": 4}
     assert result.produced == {"gear": 2}
 
 
 def test_chain():
+    recipes = {
+        "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
+        "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
+    }
     result = produce_required_items(
-        recipes={
-            "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
-            "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
-        },
+        recipes=recipes.values(),
         require={"gear": 2},
     )
 
     assert result.solvable
-    assert result.recipe_count["iron-smelting"] == 4
-    assert result.recipe_count["gear-assembly"] == 2
+    assert result.recipe_count[recipes["iron-smelting"]] == 4
+    assert result.recipe_count[recipes["gear-assembly"]] == 2
     assert result.consumed == {"iron-ore": 4, "iron-plate": 4}
     assert result.produced == {"iron-plate": 4, "gear": 2}
 
 
 def test_chain_with_provide():
+    recipes = {
+        "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
+        "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
+    }
     result = produce_required_items(
-        recipes={
-            "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
-            "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
-        },
+        recipes=recipes.values(),
         require={"gear": 2},
         provide={"iron-plate": 2},
     )
 
     assert result.solvable
-    assert result.recipe_count["iron-smelting"] == 2
-    assert result.recipe_count["gear-assembly"] == 2
+    assert result.recipe_count[recipes["iron-smelting"]] == 2
+    assert result.recipe_count[recipes["gear-assembly"]] == 2
     assert result.consumed == {"iron-ore": 2, "iron-plate": 4}
     assert result.produced == {"iron-plate": 2, "gear": 2}
 
 
 def test_chain_with_provide_overflow():
+    recipes = {
+        "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
+        "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
+    }
     result = produce_required_items(
-        recipes={
-            "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
-            "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
-        },
+        recipes=recipes.values(),
         require={"gear": 2},
         provide={"iron-plate": 10},
     )
 
     assert result.solvable
-    assert result.recipe_count["iron-smelting"] == 0
-    assert result.recipe_count["gear-assembly"] == 2
+    assert result.recipe_count[recipes["iron-smelting"]] == 0
+    assert result.recipe_count[recipes["gear-assembly"]] == 2
     assert result.consumed["iron-plate"] == 4
     assert result.produced["gear"] == 2
 
 
 def test_side_products():
+    recipes = {
+        "advanced-oil-processing": Recipe(
+            inputs={"crude-oil": 100, "water": 50},
+            outputs={"heavy-oil": 25, "light-oil": 45, "petroleum-gas": 55},
+        ),
+        "light-oil-cracking": Recipe(
+            inputs={"light-oil": 30, "water": 30}, outputs={"petroleum-gas": 20}
+        ),
+        "heavy-oil-cracking": Recipe(
+            inputs={"heavy-oil": 40, "water": 30}, outputs={"light-oil": 30}
+        ),
+    }
     result = produce_required_items(
-        recipes={
-            "advanced-oil-processing": Recipe(
-                inputs={"crude-oil": 100, "water": 50},
-                outputs={"heavy-oil": 25, "light-oil": 45, "petroleum-gas": 55},
-            ),
-            "light-oil-cracking": Recipe(
-                inputs={"light-oil": 30, "water": 30}, outputs={"petroleum-gas": 20}
-            ),
-            "heavy-oil-cracking": Recipe(
-                inputs={"heavy-oil": 40, "water": 30}, outputs={"light-oil": 30}
-            ),
-        },
+        recipes=recipes.values(),
         require={"petroleum-gas": 110},
     )
 
     assert result.solvable
-    assert result.recipe_count["advanced-oil-processing"] > 0
-    assert result.recipe_count["light-oil-cracking"] > 0
-    assert result.recipe_count["heavy-oil-cracking"] > 0
+    assert result.recipe_count[recipes["advanced-oil-processing"]] > 0
+    assert result.recipe_count[recipes["light-oil-cracking"]] > 0
+    assert result.recipe_count[recipes["heavy-oil-cracking"]] > 0
     assert result.produced["petroleum-gas"] == 110
     assert result.consumed["petroleum-gas"] == 0
     for intermediate in ["light-oil", "heavy-oil"]:
@@ -98,10 +101,11 @@ def test_side_products():
 
 
 def test_maximize():
+    recipes = {
+        "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
+    }
     result = produce_required_items(
-        recipes={
-            "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
-        },
+        recipes=recipes.values(),
         limit={"iron-plate": 8},
         maximize=["gear"],
     )
@@ -112,11 +116,12 @@ def test_maximize():
 
 
 def test_maximize_and_require():
+    recipes = {
+        "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
+        "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
+    }
     result = produce_required_items(
-        recipes={
-            "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
-            "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
-        },
+        recipes=recipes.values(),
         limit={"iron-ore": 8},
         require={"iron-plate": 2},
         maximize=["gear"],
@@ -145,7 +150,7 @@ def test_maximize_with_two_inputs():
     }
 
     result = produce_required_items(
-        recipes=recipes,
+        recipes=recipes.values(),
         limit={"iron-ore": 15},
         maximize=["electronic-circuit"],
     )
@@ -165,10 +170,11 @@ def test_maximize_with_two_inputs():
 
 
 def test_maximize_unbounded():
+    recipes = {
+        "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
+    }
     result = produce_required_items(
-        recipes={
-            "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
-        },
+        recipes=recipes.values(),
         maximize=["gear"],
     )
 
@@ -176,11 +182,12 @@ def test_maximize_unbounded():
 
 
 def test_conserve():
+    recipes = {
+        "fuel-from-oil": Recipe(inputs={"oil": 1}, outputs={"fuel": 1}),
+        "fuel-from-fuel-gas": Recipe(inputs={"fuel-gas": 1}, outputs={"fuel": 1}),
+    }
     result = produce_required_items(
-        recipes={
-            "fuel-from-oil": Recipe(inputs={"oil": 1}, outputs={"fuel": 1}),
-            "fuel-from-fuel-gas": Recipe(inputs={"fuel-gas": 1}, outputs={"fuel": 1}),
-        },
+        recipes=recipes.values(),
         require={"fuel": 1},
         conserve=["oil"],
     )
@@ -190,11 +197,12 @@ def test_conserve():
     assert result.consumed["fuel-gas"] == 1
     assert result.consumed["oil"] == 0
 
+    recipes = {
+        "fuel-from-oil": Recipe(inputs={"oil": 1}, outputs={"fuel": 1}),
+        "fuel-from-fuel-gas": Recipe(inputs={"fuel-gas": 1}, outputs={"fuel": 1}),
+    }
     result = produce_required_items(
-        recipes={
-            "fuel-from-oil": Recipe(inputs={"oil": 1}, outputs={"fuel": 1}),
-            "fuel-from-fuel-gas": Recipe(inputs={"fuel-gas": 1}, outputs={"fuel": 1}),
-        },
+        recipes=recipes.values(),
         require={"fuel": 1},
         conserve=["fuel-gas"],
     )
@@ -206,20 +214,19 @@ def test_conserve():
 
 
 def test_cycle():
+    recipes = {
+        "grow-wood": Recipe(inputs={"sapling": 1, "water": 10}, outputs={"wood": 10}),
+        "sapling-processing": Recipe(
+            inputs={"wood": 2, "water": 5}, outputs={"sapling": 1}
+        ),
+    }
     result = produce_required_items(
-        recipes={
-            "grow-wood": Recipe(
-                inputs={"sapling": 1, "water": 10}, outputs={"wood": 10}
-            ),
-            "sapling-processing": Recipe(
-                inputs={"wood": 2, "water": 5}, outputs={"sapling": 1}
-            ),
-        },
+        recipes=recipes.values(),
         require={"wood": 80},
     )
 
     assert result.solvable
-    assert result.recipe_count["grow-wood"] == 10
+    assert result.recipe_count[recipes["grow-wood"]] == 10
     assert result.consumed["wood"] > 0
     assert result.produced["wood"] - result.consumed["wood"] == 80
     assert result.produced["sapling"] > 0

@@ -1,5 +1,5 @@
 from typing import TypeAlias
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import logging
 
 logger = logging.getLogger(__name__)
@@ -10,6 +10,19 @@ logger.setLevel(logging.DEBUG)
 class Recipe:
     inputs: dict[str, int]
     outputs: dict[str, int]
+    serialized: str = field(init=False)
+
+    def __post_init__(self):
+        tokens = []
+        for item, count in self.inputs.items():
+            tokens.append(f"{count} {item}")
+        tokens.append("-->")
+        for item, count in self.outputs.items():
+            tokens.append(f"{count} {item}")
+        self.serialized = " ".join(tokens)
+
+    def __hash__(self):
+        return hash(self.serialized)
 
     def get_input_count(self, input) -> int:
         return self.inputs.get(input, 0)
@@ -71,6 +84,15 @@ class RecipeBook:
     def __init__(self, recipes: list[Recipe]):
         self.recipes = recipes
 
+    def __len__(self):
+        return len(self.recipes)
+
+    def __iter__(self):
+        return iter(self.recipes)
+
+    def all(self) -> list[Recipe]:
+        return self.recipes
+
     def find_producers_of(self, item) -> list[Recipe]:
         producers = []
         for recipe in self.recipes:
@@ -97,3 +119,10 @@ class RecipeBook:
 
     def add_recipe(self, recipe: Recipe):
         self.recipes.append(recipe)
+
+    def get_outputs(self) -> list[str]:
+        outputs = set()
+        for recipe in self.recipes:
+            for item in recipe.outputs:
+                outputs.add(item)
+        return outputs

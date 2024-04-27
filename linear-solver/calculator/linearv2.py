@@ -64,7 +64,7 @@ class OptimizerResult:
 
 
 def produce_required_items(
-    recipes: dict[str, Recipe],
+    recipes: list[Recipe],
     require: dict[str, int] = {},
     maximize: list[str] = [],
     provide: dict[str, int] = {},
@@ -88,14 +88,14 @@ def produce_required_items(
     for item in limit:
         items.add(item)
 
-    for recipe in recipes.values():
+    for recipe in recipes:
         for input in recipe.inputs:
             items.add(input)
         for output in recipe.outputs:
             items.add(output)
 
     items = sorted(items)
-    used_recipes = {**recipes}
+    used_recipes = [*recipes]
 
     # figure out which inputs dont have a producing recipe
     # these will be inputs to the production line
@@ -103,7 +103,7 @@ def produce_required_items(
     # to create the needed amount
     pure_inputs = set(items)
 
-    for recipe in used_recipes.values():
+    for recipe in used_recipes:
         for output in recipe.outputs:
             pure_inputs.discard(output)
 
@@ -113,29 +113,29 @@ def produce_required_items(
         if item in limit:
             continue
         input_recipe = Recipe(inputs={}, outputs={item: 1})
-        used_recipes[f"source-{item}"] = input_recipe
-        input_recipes.add(f"source-{item}")
+        used_recipes.append(input_recipe)
+        input_recipes.add(input_recipe)
 
     # generate an output recipe for all outputs
     # output recipes control optimization of byproducts
     # see recipe_weights
     all_outputs = set()
-    for recipe in used_recipes.values():
+    for recipe in used_recipes:
         for output in recipe.outputs:
             all_outputs.add(output)
 
     output_recipes = set()
     for output in all_outputs:
         output_recipe = Recipe(inputs={output: 1}, outputs={})
-        used_recipes[f"sink-{output}"] = output_recipe
-        output_recipes.add(f"sink-{output}")
+        used_recipes.append(output_recipe)
+        output_recipes.add(output_recipe)
 
     # sums up the inputs + outputs of all recipes, by item
     # cell i,j contains how many of item i recipe j consumes (negative) or produces (positive)
     recipe_item_sums = list()
     for item in items:
         row = list()
-        for recipe in used_recipes.values():
+        for recipe in used_recipes:
             row.append(recipe.get_item_count(item))
         logger.debug(f"{item}: {row}")
         recipe_item_sums.append(row)
@@ -154,7 +154,7 @@ def produce_required_items(
     recipe_weights = list()
     for recipe in used_recipes:
         if recipe in input_recipes:
-            item = list(used_recipes[recipe].outputs.keys())[0]
+            item = list(recipe.outputs.keys())[0]
             if item in conserve:
                 # try to minimize input
                 recipe_weights.append(1)
@@ -162,7 +162,7 @@ def produce_required_items(
                 # dont optimize - take as many as is required
                 recipe_weights.append(0)
         elif recipe in output_recipes:
-            item = list(used_recipes[recipe].inputs.keys())[0]
+            item = list(recipe.inputs.keys())[0]
             if item in maximize:
                 # enourage producing as much of this output as possible
                 recipe_weights.append(-1)
@@ -184,15 +184,15 @@ def produce_required_items(
     total_inputs = defaultdict(lambda: 0)
     total_outputs = defaultdict(lambda: 0)
     if result.success:
-        for recipe_count, (recipe_name, recipe) in zip(result.x, used_recipes.items()):
-            if recipe_name not in output_recipes and recipe_name not in input_recipes:
-                recipe_counts[recipe_name] = recipe_count
+        for recipe_count, recipe in zip(result.x, used_recipes):
+            if recipe not in output_recipes and recipe not in input_recipes:
+                recipe_counts[recipe] = recipe_count
 
-            if recipe_name not in output_recipes:
+            if recipe not in output_recipes:
                 for item, count in recipe.inputs.items():
                     total_inputs[item] += count * recipe_count
 
-            if recipe_name not in input_recipes:
+            if recipe not in input_recipes:
                 for item, count in recipe.outputs.items():
                     total_outputs[item] += count * recipe_count
 
@@ -203,7 +203,7 @@ def produce_required_items(
             for output_name, output_count in recipe.outputs.items():
                 outputs.append(f"{output_count * recipe_count:.1f} x {output_name}")
             logger.debug(
-                f"{recipe_count:.1f} x {recipe_name}: {' + '.join(inputs)} --> {' + '.join(outputs)}"
+                f"{recipe_count:.1f} x {recipe.serialized}: {' + '.join(inputs)} --> {' + '.join(outputs)}"
             )
 
     else:
