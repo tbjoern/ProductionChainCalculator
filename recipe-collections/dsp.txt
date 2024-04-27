@@ -81,6 +81,7 @@ redscience;6;matrix;2,graphite;2,hydrogen
 yellowscience;8;matrix;diamond;titaniumcrystal
 purplescience;10;matrix;particlebroadband;2,processor
 2,greenscience;24;matrix;gravitonlens;quantumchip
+whitescience;1;matrix;bluescience;redscience;yellowscience;purplescience;greenscience
 
 # optional recipes
 2,graphene+1,hydrogen;2;chemicalplant;2,fireice

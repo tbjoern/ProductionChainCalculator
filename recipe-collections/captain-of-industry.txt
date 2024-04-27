@@ -1,0 +1,54 @@
+# line        = recipe | whitespace | comment
+# comment     = '#' [ text ]
+# recipe      = item-list ';' time ';' factory ';' ingredients
+# item-list   = item [ '+' item-list ]
+# ingredients = item [ ';' ingredients ]
+# item        = [ number ',' ] text
+
+
+iron-ore;1;excavator
+copper-ore;1;excavator
+coal;1;excavator
+limestone;1;excavator
+sand;1;excavator
+wood;1;tree-harvester
+
+water;1;placeholder
+sulfur;1;placeholder
+rubber;1;placeholder
+salt;1;placeholder
+hydrogen;1;placeholder
+gravel;1;placeholder
+
+24,iron;60;metal-caster-2;24,molten-iron
+#24,molten-iron+12,slag+24,exhaust;60;blast-furnace;24,iron-ore;9,coal
+48,molten-iron+18,slag+36,exhaust;60;blast-furnace-2;36,iron-ore-crushed;3,limestone;15,coal
+36,iron-ore-crushed;60;crusher;36,iron-ore
+
+24,copper;60;copper-electrolysis;24,impure-copper;6,acid
+24,impure-copper;60;metal-caster-2;24,molten-copper
+48,molten-copper+18,slag+36,exhaust;60;blast-furnace-2;36,copper-ore-crushed;6,sand;15,coal
+36,copper-ore-crushed;60;crusher;36,copper-ore
+36,acid;60;mixer;30,water;6,sulfur
+24,steel;60;cooled-caster-2;24,molten-steel;12,water
+24,molten-steel+36,exhaust;60;oxygen-furnace-2;48,molten-iron;18,oxygen
+72,glass;60;glass-maker-2;48,molten-glass
+48,molten-glass+12,slag+36,exhaust;60;blast-furnace-2;48,glass-mix;15,coal
+48,glass-mix;60;mixer;48,sand;12,limestone;12,salt;12,acid
+
+36,oxygen+36,nitrogen;60;air-separator
+
+24,mechanical-parts;60;assembly-3;12,steel
+24,electronics;60;assembly-3;24,copper;6,rubber
+12,vehicle-parts;60;assembly-3;12,iron;6,mechanical-parts;6,electronics
+6,vehicle-parts-2;60;assembly-3;6,vehicle-parts;3,steel;3,glass
+
+# concrete
+
+6,cement+12,CO2;60;rotary-kiln-gas;18,limestone;6,hydrogen
+48,concrete;60;concrete-mixer-3;36,gravel;12,sand;24,water;6,cement
+144,slag-crushed;60;crusher-large;144,slag
+
+24,construction-parts;60;assembly-3;18,iron;18,wood;24,concrete
+12,construction-parts-2;60;assembly-3;24,construction-parts;12,electronics
+

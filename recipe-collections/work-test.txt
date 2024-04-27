@@ -1,0 +1,6 @@
+second;1;magic
+assembler;1;magic
+minute;1;magic;60,second
+
+output;1;magic;60,assembler-work
+3,assembler-work;1;magic;second;assembler

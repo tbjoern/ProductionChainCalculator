@@ -1,0 +1,50 @@
+# line        = recipe | whitespace | comment
+# comment     = '#' [ text ]
+# recipe      = item-list ';' time ';' factory ';' ingredients
+# item-list   = item [ '+' item-list ]
+# ingredients = item [ ';' ingredients ]
+# item        = [ number ',' ] text
+
+dawnthorn-armor;1;tailoring-bench;9,pristine-leather;9,silk
+hollowfang-armor;1;tailoring-bench;9,cotton-yarn;6,wool-thread
+merciless-hollowfang-armor;1;tailoring-bench;3,iron-ingot;9,thick-leather;hollowfang-armor
+
+# smeltery
+iron-ingot;60;smeltery;15,iron-ore
+
+# tannery
+leather;60;tannery;12,rugged-hide
+thick-leather;60;tannery;1,oil;12,thick-hide
+pristine-leather;1;tannery;15,pristine-hide;15,mutant-grease
+
+# loom
+cloth;1;loom;3,leather;9,fiber
+4,cloth;1;loom;3,thick-leather;12,fiber
+8,cloth;1;loom;3,pristine-leather;18,fiber
+coarse-thread;1;loom;12,pollen;9,fiber
+2,carpet-roll;1;loom;1,wool-thread;3,cloth
+cotton-yarn;1;loom;12,cotton
+1,wool-thread;1;loom;3,coarse-thread;1,cloth
+2,silk;1;loom;3,silkworm;3,cloth
+
+# sawmill
+1,oil+4,plank;60;sawmill;15,hallow-wood
+
+# grinder
+10,pollen;1;grinder;15,any-flower
+
+# monster drops
+rugged-hide;1;animals
+thick-hide;1;animals
+fiber;1;plants
+pristine-hide;1;twilight-forest
+mutant-grease;1;gloomrot
+silkworm;1;twilight-forest
+
+# ores
+iron-ore;1;haunted-mine
+
+# plants
+hallow-wood;1;hallowed-forest
+cotton;1;cotton-plant
+any-flower;1;none

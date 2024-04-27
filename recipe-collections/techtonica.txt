@@ -1,0 +1,23 @@
+# mining
+
+25,ironore;60;miner;9,fuel
+15,ironbar;60;smelter;30,ironore;9,fuel
+
+# smelting
+
+25,copperore;60;miner;9,fuel
+15,copperbar;60;smelter;30,copperore;9,fuel
+
+# fuel conversion
+
+3,fuel;1;conversion;kindlevinestem
+fuel;1;conversion;plantmatter
+
+plantmatter;1;gathering
+1,kindlevineseed;1;gathering
+
+# plants
+
+4,kindlevine;120;planter;1,kindlevineseed
+30,kindlevinestem+2.5,kindlevineseed;60;thresher;10,kindlevine
+

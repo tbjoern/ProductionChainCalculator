@@ -33,7 +33,7 @@ unstable gel;1;hand;200,cactus flesh
 glass;1;hand;40,frost crystal
 poly fibre;1;hand;100,cactus flesh;200,star bulb
 liquid explosive;1;hand;acid;unstable gel
-living glass;1;hand;lubricant;glass
+living glass;1;hand;lubricant;5,glass
 heat capacitor;1;hand;100,frost crystal;200,solanium
 circuit board;1;hand;heat capacitor;poly fibre
 

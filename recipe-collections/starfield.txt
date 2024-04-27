@@ -1,0 +1,39 @@
+# buildings
+solar-panel;1;building;4,aluminium;2,beryllium;3,copper
+extractor;1;building;4,aluminium;2,tungsten;5,iron
+storage-solid;1;building;5,aluminium;3,adaptive-frame;6,iron
+storage-gas;1;building;6,copper;5,tungsten;3,adaptive-frame
+fueled-generator;1;building;4,tungsten;2,isocentered-magnet;1,austenitic-manifold;1,tau-grade-rheostat
+cargo-link;1;building;12,aluminium;2,zero-wire;2,beryllium;20,iron
+cargo-link-inter-system;1;building;12,aluminium;3,reactive-gauge;1,comm-relay;20,iron
+landing-pad-small;1;building;8,aluminium;20,iron
+
+# intermediates
+adaptive-frame;1;fabricator;iron;aluminium
+austenitic-manifold;1;fabricator;2,nickel;2,iron;reactive-gauge
+comm-relay;1;fabricator;tau-grade-rheostat;isocentered-magnet
+isocentered-magnet;1;fabricator;iron;cobalt
+isotopic-coolant;1;fabricator;ionic-liquids;tetrafluorides
+mag-pressure-tank;1;fabricator;2,aluminium;nickel
+monopropellant;1;fabricator;2,alkanes
+polytextiles;1;fabricator;cosmetic;2,fiber
+reactive-gauge;1;fabricator;2,aluminium;copper
+tau-grade-rheostat;1;fabricator;copper;beryllium
+zero-wire;1;fabricator;copper;silver
+
+# resources
+iron;1;mining
+aluminium;1;mining
+beryllium;1;mining
+tungsten;1;mining
+copper;1;mining
+nickel;1;mining
+cobalt;1;mining
+silver;1;mining
+
+alkanes;1;unknown
+ionic-liquids;1;unknown
+tetrafluorides;1;unknown
+
+cosmetic;1;animals
+fiber;1;plants
