@@ -16,10 +16,13 @@ class Recipe:
         tokens = []
         for item, count in self.inputs.items():
             tokens.append(f"{count} {item}")
-        tokens.append("-->")
+        inputs = " + ".join(tokens)
+
+        tokens = []
         for item, count in self.outputs.items():
             tokens.append(f"{count} {item}")
-        self.serialized = " ".join(tokens)
+        outputs = " + ".join(tokens)
+        self.serialized = " ".join([inputs, "-->", outputs])
 
     def __hash__(self):
         return hash(self.serialized)
