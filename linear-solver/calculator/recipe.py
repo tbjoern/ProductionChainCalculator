@@ -1,4 +1,4 @@
-from typing import TypeAlias
+from typing import TypeAlias, Any
 from dataclasses import dataclass, field
 import logging
 
@@ -10,6 +10,7 @@ logger.setLevel(logging.DEBUG)
 class Recipe:
     inputs: dict[str, int]
     outputs: dict[str, int]
+    extras: dict[str, Any] = field(default_factory=dict)
     serialized: str = field(init=False)
 
     def __post_init__(self):
@@ -22,7 +23,16 @@ class Recipe:
         for item, count in self.outputs.items():
             tokens.append(f"{count} {item}")
         outputs = " + ".join(tokens)
-        self.serialized = " ".join([inputs, "-->", outputs])
+
+        tokens = []
+        for extra, value in self.extras.items():
+            tokens.append(f"{extra}: {value}")
+        extras = ", ".join(tokens)
+
+        tokens = [inputs, "-->", outputs]
+        if extras != "":
+            tokens.extend([";", extras])
+        self.serialized = " ".join(tokens)
 
     def __hash__(self):
         return hash(self.serialized)
@@ -65,11 +75,32 @@ def parse_defs(item_string) -> dict:
     return items
 
 
+def parse_extras(extras_spec) -> dict[str, Any]:
+    extras = {}
+    extras_defs = extras_spec.split(",")
+    for extra_def in extras_defs:
+        name, value = extra_def.split(":")
+        name = name.strip()
+        value = value.strip()
+        try:
+            value = float(value)
+        except:
+            pass
+        extras[name] = value
+    return extras
+
+
 def parse_line(line) -> tuple[str, Recipe]:
-    input_string, output_string = line.split("-->")
+    recipe_spec, *extra_spec = line.split(";", maxsplit=1)
+    if len(extra_spec) > 0:
+        extras = parse_extras(extra_spec[0])
+    else:
+        extras = {}
+
+    input_string, output_string = recipe_spec.split("-->")
     inputs = parse_defs(input_string.strip())
     outputs = parse_defs(output_string.strip())
-    return Recipe(inputs=inputs, outputs=outputs)
+    return Recipe(inputs=inputs, outputs=outputs, extras=extras)
 
 
 def parse_spec(lines, ignore_errors=True) -> list[Recipe]:

@@ -40,6 +40,14 @@ class TestParser:
         assert recipe.inputs == {"water": 1}
         assert recipe.outputs == {}
 
+    def test_parse_additional_data(self):
+        recipe = parse_line("1 ore --> 1 plate ; time: 60, machine: smelter")
+
+        assert recipe.inputs == {"ore": 1}
+        assert recipe.outputs == {"plate": 1}
+        assert recipe.extras["time"] == 60
+        assert recipe.extras["machine"] == "smelter"
+
     def test_parse_spec(self):
         spec = [
             "3 iron-ore + coal --> 3 iron-plate + slag",
