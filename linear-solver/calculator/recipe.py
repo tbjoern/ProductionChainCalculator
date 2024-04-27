@@ -24,6 +24,9 @@ class Recipe:
     def __hash__(self):
         return hash(self.serialized)
 
+    def __str__(self):
+        return self.serialized
+
     def get_input_count(self, input) -> int:
         return self.inputs.get(input, 0)
 
@@ -34,6 +37,18 @@ class Recipe:
         return self.get_output_count(item) - self.get_input_count(item)
 
 
+def parse_def(item_def):
+    tokens = item_def.split()
+    if len(tokens) == 1:
+        name = tokens[0].strip()
+        count = 1
+    else:
+        count, name = tokens
+        count = float(count.strip())
+        name = name.strip()
+    return name, count
+
+
 def parse_defs(item_string) -> dict:
     items = {}
 
@@ -42,14 +57,7 @@ def parse_defs(item_string) -> dict:
 
     item_defs = item_string.split("+")
     for item_def in item_defs:
-        tokens = item_def.split()
-        if len(tokens) == 1:
-            name = tokens[0].strip()
-            count = 1
-        else:
-            count, name = tokens
-            count = float(count.strip())
-            name = name.strip()
+        name, count = parse_def(item_def)
         items[name] = count
     return items
 
