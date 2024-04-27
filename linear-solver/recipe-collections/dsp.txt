@@ -1,0 +1,100 @@
+# raw resources
+ --> 1 ironore ; time: 2.0, factory: ironvein
+ --> 1 copperore ; time: 2.0, factory: coppervein
+ --> 1 stoneore ; time: 2.0, factory: stonevein
+ --> 1 coal ; time: 2.0, factory: coalvein
+ --> 1 siliconore ; time: 2.0, factory: siliconvein
+ --> 1 titaniumore ; time: 2.0, factory: titaniumvein
+ --> 1 oil ; time: 1.0, factory: oilwell
+ --> 1 water ; time: 2.0, factory: waterpump
+ --> 1 fireice ; time: 2.0, factory: fireicevein
+ --> 1 spiniformstalagmitecrystal ; time: 2.0, factory: spiniformstalagmitecystalvein
+ --> 1 opticalgratingcrystal ; time: 2.0, factory: opticalgratingcrystalvein
+ --> 1 kimberliteore ; time: 2.0, factory: kimberlitevein
+ --> 1 unipolarmagnet ; time: 2.0, factory: unipolarmagnetvein
+
+# plates and direct smelts
+1 ironore --> 1 ironingot ; time: 1.0, factory: smelter
+1 copperore --> 1 copperingot ; time: 1.0, factory: smelter
+1 stoneore --> 1 stone ; time: 1.0, factory: smelter
+2 coal --> 1 graphite ; time: 2.0, factory: smelter
+2 siliconore --> 1 siliconingot ; time: 2.0, factory: smelter
+2 titaniumore --> 1 titaniumingot ; time: 2.0, factory: smelter
+1 ironore --> 1 magnet ; time: 1.5, factory: smelter
+
+# chemistry
+2 oil --> 1 hydrogen + 2 refinedoil ; time: 4.0, factory: refinery
+4 refinedoil + 8 stoneore + 4 water --> 4 sulfuricacid ; time: 6.0, factory: chemicalplant
+2 refinedoil + 1 graphite --> 1 plastic ; time: 3.0, factory: chemicalplant
+3 graphite + 1 sulfuricacid --> 2 graphene ; time: 3.0, factory: chemicalplant
+2 plastic + 1 refinedoil + 1 water --> 1 organiccrystal ; time: 6.0, factory: chemicalplant
+3 hydrogen --> 3 deuterium ; time: 10.0, factory: fractionator
+
+
+# basic materials
+1 ironingot --> 1 gear ; time: 1.0, factory: assembler
+3 ironingot --> 1 steel ; time: 3.0, factory: smelter
+2 stoneore --> 1 glass ; time: 2.0, factory: smelter
+3 glass --> 2 prism ; time: 2.0, factory: assembler
+1 graphite --> 1 diamond ; time: 2.0, factory: smelter
+1 siliconingot --> 1 crystalsilicon ; time: 1.0, factory: smelter
+
+# intermediate materials
+2 magnet + 1 copperingot --> 2 magneticcoil ; time: 1.0, factory: assembler
+2 ironingot + 1 copperingot --> 2 circuitboard ; time: 1.0, factory: assembler
+4 magneticcoil + 2 prism --> 1 plasmaexiter ; time: 2.0, factory: assembler
+2 prism + 1 circuitboard --> 1 photoncombiner ; time: 3.0, factory: assembler
+
+2 ironingot + 1 gear + 1 magneticcoil --> 1 motor ; time: 2.0, factory: assembler
+2 motor + 2 magneticcoil --> 1 turbine ; time: 2.0, factory: assembler
+2 turbine + 3 magnet + 1 graphite --> 1 supermagneticring ; time: 3.0, factory: assembler
+
+2 siliconingot + 1 copperingot --> 1 component ; time: 2.0, factory: assembler
+2 circuitboard + 2 component --> 1 processor ; time: 3.0, factory: assembler
+
+1 organiccrystal + 3 titaniumingot --> 1 titaniumcrystal ; time: 4.0, factory: assembler
+4 titaniumingot + 4 steel + 8 sulfuricacid --> 4 titaniumalloy ; time: 12.0, factory: smelter
+3 graphene + 1 titaniumingot --> 2 nanotube ; time: 4.0, factory: chemicalplant
+2 glass + 2 titaniumingot + 2 water --> 2 titaniumglass ; time: 5.0, factory: assembler
+
+# advanced materials
+2 turbine + 2 copperingot + 2 graphene --> 1 particlecontainer ; time: 4.0, factory: assembler
+2 nanotube + 2 crystalsilicon + 1 plastic --> 1 particlebroadband ; time: 8.0, factory: assembler
+4 nanotube + 1 titaniumalloy + 1 siliconingot --> 1 framematerial ; time: 6.0, factory: assembler
+1 titaniumcrystal + 2 graphene + 12 hydrogen --> 1 casimircrystal ; time: 4.0, factory: assembler
+
+2 particlecontainer + 2 ironingot + 10 deuterium --> 1 strangematter ; time: 8.0, factory: particlecollider
+4 diamond + 1 strangematter --> 1 gravitonlens ; time: 6.0, factory: assembler
+1 gravitonlens --> 1 spacewarper ; time: 10.0, factory: assembler
+1 casimircrystal + 2 titaniumglass --> 1 planefilter ; time: 12.0, factory: assembler
+2 processor + 2 planefilter --> 1 quantumchip ; time: 6.0, factory: assembler
+
+# products
+10 deuterium + 1 supermagneticring --> 1 deuteronfuelrod ; time: 6.0, factory: titaniumalloy
+1 graphene + 1 photoncombiner --> 2 solarsail ; time: 4.0, factory: assembler
+3 framematerial + 3 solarsail + 3 processor --> 1 dysonspherecomponent ; time: 8.0, factory: assembler
+2 dysonspherecomponent + 2 deuteronfuelrod + 2 quantumchip --> 1 smallcarrierrocket ; time: 6.0, factory: assembler
+
+# science
+1 magneticcoil + 1 circuitboard --> 1 bluescience ; time: 3.0, factory: matrix
+2 graphite + 2 hydrogen --> 1 redscience ; time: 6.0, factory: matrix
+1 diamond + 1 titaniumcrystal --> 1 yellowscience ; time: 8.0, factory: matrix
+1 particlebroadband + 2 processor --> 1 purplescience ; time: 10.0, factory: matrix
+1 gravitonlens + 1 quantumchip --> 2 greenscience ; time: 24.0, factory: matrix
+1 bluescience + 1 redscience + 1 yellowscience + 1 purplescience + 1 greenscience --> 1 whitescience ; time: 1.0, factory: matrix
+
+# optional recipes
+2 fireice --> 2 graphene + 1 hydrogen ; time: 2.0, factory: chemicalplant
+ --> 1 organiccrystal ; time: 2.0, factory: organiccrystalvein
+2 spiniformstalagmitecrystal --> 2 nanotube ; time: 4.0, factory: chemicalplant
+1 opticalgratingcrystal + 1 circuitboard --> 1 photoncombiner ; time: 3.0, factory: assembler
+1 kimberliteore --> 1 diamond ; time: 2.0, factory: smelter
+10 unipolarmagnet + 2 copperingot --> 1 particlecontainer ; time: 10.0, factory: assembler
+1 greenscience --> 8 spacewarper ; time: 10.0, factory: matrix
+
+# orbital collection
+# not sure if the rates are planet dependent (they probably are)
+# so you have to divide the output by the planets rate
+ --> 1 fireice ; time: 0.125, factory: orbitalcollector
+ --> 1 hydrogen ; time: 0.125, factory: orbitalcollector
+

@@ -1,0 +1,23 @@
+# mining
+
+9 fuel --> 25 ironore ; time: 60.0, factory: miner
+30 ironore + 9 fuel --> 15 ironbar ; time: 60.0, factory: smelter
+
+# smelting
+
+9 fuel --> 25 copperore ; time: 60.0, factory: miner
+30 copperore + 9 fuel --> 15 copperbar ; time: 60.0, factory: smelter
+
+# fuel conversion
+
+1 kindlevinestem --> 3 fuel ; time: 1.0, factory: conversion
+1 plantmatter --> 1 fuel ; time: 1.0, factory: conversion
+
+ --> 1 plantmatter ; time: 1.0, factory: gathering
+ --> 1 kindlevineseed ; time: 1.0, factory: gathering
+
+# plants
+
+1 kindlevineseed --> 4 kindlevine ; time: 120.0, factory: planter
+
+

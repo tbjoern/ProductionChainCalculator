@@ -1,0 +1,36 @@
+# smelting
+iron-ore --> iron-plate ; time: 3.2, machine: furnace
+copper-ore --> copper-plate ; time: 3.2, machine: furnace
+5 iron-plate --> steel-plate ; time: 16, machine: furnace
+2 stone --> stone-brick ; time: 3.2, machine: furnace
+
+# intermediaries
+
+2 iron-plate --> gear ; time: 0.5, machine: assembler
+copper-plate --> 2 copper-wire ; time: 0.5, machine: assembler
+iron-plate + 3 copper-wire --> electronic-circuit ; time: 0.5, machine: assembler
+iron-plate --> pipe ; time: 0.5, machine: assembler
+10 pipe + 5 iron-plate --> 2 underground-pipe ; time: 0.5, machine: assembler
+2 pipe + gear + steel-plate --> engine-unit ; time: 10, machine: assembler
+4 copper-wire + 2 electronic-circuit + 2 plastic --> advanced-circuit ; time: 6, machine: assembler
+2 advanced-circuit + 20 electronic-circuit + 5 sulfuric-acid --> processing-unit ; time: 10, machine: assembler
+
+# items
+iron-plate + gear --> 2 transport-belt ; time: 0.5, machine: assembler
+iron-plate + gear + electronic-circuit --> inserter ; time: 0.5, machine: assembler
+
+# oil
+100 oil --> 45 petroleum-gas ; time: ?, machine: refinery
+100 oil + 50 water --> 25 heavy-oil + 45 light-oil + 55 petroleum-gas ; time: ?, machine: refinery
+30 light-oil + 30 water --> 20 petroleum-gas ; time: ?, machine: chemical-plant
+40 heavy-oil + 30 water --> 30 light-oil ; time: ?, machine: chemical-plant
+
+coal + 20 petroleum-gas --> 2 plastic ; time: ?, machine: chemical-plant
+30 water + 30 petroleum-gas --> 2 sulfur ; time: ?, machine: chemical-plant
+100 water + 5 sulfur + iron-plate --> 50 sulfuric-acid ; time: ?, machine: chemical-plant
+iron-plate + copper-plate + 20 sulfuric-acid --> battery ; time: ?, machine: chemical-plant
+
+# science
+gear + copper-plate --> automation-science-pack ; time: 5, machine: assembler
+transport-belt + inserter --> logistic-science-pack ; time: 6, machine: assembler
+2 engine-unit + 3 advanced-circuit + sulfur --> 2 chemical-science-pack ; time: 6, machine: assembler

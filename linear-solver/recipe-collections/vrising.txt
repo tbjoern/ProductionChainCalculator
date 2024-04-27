@@ -1,0 +1,51 @@
+# line        = recipe | whitespace | comment
+# comment     = '#' [ text ]
+# recipe      = item-list ';' time ';' factory ';' ingredients
+# item-list   = item [ '+' item-list ]
+# ingredients = item [ ';' ingredients ]
+# item        = [ number ',' ] text
+
+9 pristine-leather + 9 silk --> 1 dawnthorn-armor ; factory: tailoring-bench
+9 cotton-yarn + 6 wool-thread --> 1 hollowfang-armor ; factory: tailoring-bench
+3 iron-ingot + 9 thick-leather + 1 hollowfang-armor --> 1 merciless-hollowfang-armor ; factory: tailoring-bench
+
+# smeltery
+15 iron-ore --> 1 iron-ingot ; factory: smeltery
+
+# tannery
+12 rugged-hide --> 1 leather ; factory: tannery
+1 oil + 12 thick-hide --> 1 thick-leather ; factory: tannery
+15 pristine-hide + 15 mutant-grease --> 1 pristine-leather ; factory: tannery
+
+# loom
+3 leather + 9 fiber --> 1 cloth ; factory: loom
+3 thick-leather + 12 fiber --> 4 cloth ; factory: loom
+3 pristine-leather + 18 fiber --> 8 cloth ; factory: loom
+12 pollen + 9 fiber --> 1 coarse-thread ; factory: loom
+1 wool-thread + 3 cloth --> 2 carpet-roll ; factory: loom
+12 cotton --> 1 cotton-yarn ; factory: loom
+3 coarse-thread + 1 cloth --> 1 wool-thread ; factory: loom
+3 silkworm + 3 cloth --> 2 silk ; factory: loom
+
+# sawmill
+15 hallow-wood --> 1 oil + 4 plank ; factory: sawmill
+
+# grinder
+15 any-flower --> 10 pollen ; factory: grinder
+
+# monster drops
+ --> 1 rugged-hide ; factory: animals
+ --> 1 thick-hide ; factory: animals
+ --> 1 fiber ; factory: plants
+ --> 1 pristine-hide ; factory: twilight-forest
+ --> 1 mutant-grease ; factory: gloomrot
+ --> 1 silkworm ; factory: twilight-forest
+
+# ores
+ --> 1 iron-ore ; factory: haunted-mine
+
+# plants
+ --> 1 hallow-wood ; factory: hallowed-forest
+ --> 1 cotton ; factory: cotton-plant
+ --> 1 any-flower ; factory: none
+

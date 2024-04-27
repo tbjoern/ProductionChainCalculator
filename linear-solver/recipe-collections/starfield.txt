@@ -1,0 +1,40 @@
+# buildings
+4 aluminium + 2 beryllium + 3 copper --> 1 solar-panel ; factory: building
+4 aluminium + 2 tungsten + 5 iron --> 1 extractor ; factory: building
+5 aluminium + 3 adaptive-frame + 6 iron --> 1 storage-solid ; factory: building
+6 copper + 5 tungsten + 3 adaptive-frame --> 1 storage-gas ; factory: building
+4 tungsten + 2 isocentered-magnet + 1 austenitic-manifold + 1 tau-grade-rheostat --> 1 fueled-generator ; factory: building
+12 aluminium + 2 zero-wire + 2 beryllium + 20 iron --> 1 cargo-link ; factory: building
+12 aluminium + 3 reactive-gauge + 1 comm-relay + 20 iron --> 1 cargo-link-inter-system ; factory: building
+8 aluminium + 20 iron --> 1 landing-pad-small ; factory: building
+
+# intermediates
+1 iron + 1 aluminium --> 1 adaptive-frame ; factory: fabricator
+2 nickel + 2 iron + 1 reactive-gauge --> 1 austenitic-manifold ; factory: fabricator
+1 tau-grade-rheostat + 1 isocentered-magnet --> 1 comm-relay ; factory: fabricator
+1 iron + 1 cobalt --> 1 isocentered-magnet ; factory: fabricator
+1 ionic-liquids + 1 tetrafluorides --> 1 isotopic-coolant ; factory: fabricator
+2 aluminium + 1 nickel --> 1 mag-pressure-tank ; factory: fabricator
+2 alkanes --> 1 monopropellant ; factory: fabricator
+1 cosmetic + 2 fiber --> 1 polytextiles ; factory: fabricator
+2 aluminium + 1 copper --> 1 reactive-gauge ; factory: fabricator
+1 copper + 1 beryllium --> 1 tau-grade-rheostat ; factory: fabricator
+1 copper + 1 silver --> 1 zero-wire ; factory: fabricator
+
+# resources
+ --> 1 iron ; factory: mining
+ --> 1 aluminium ; factory: mining
+ --> 1 beryllium ; factory: mining
+ --> 1 tungsten ; factory: mining
+ --> 1 copper ; factory: mining
+ --> 1 nickel ; factory: mining
+ --> 1 cobalt ; factory: mining
+ --> 1 silver ; factory: mining
+
+ --> 1 alkanes ; factory: unknown
+ --> 1 ionic-liquids ; factory: unknown
+ --> 1 tetrafluorides ; factory: unknown
+
+ --> 1 cosmetic ; factory: animals
+ --> 1 fiber ; factory: plants
+
