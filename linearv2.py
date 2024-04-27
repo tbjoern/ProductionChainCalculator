@@ -47,6 +47,7 @@ TODO: update this text with the output recipes. Generate an output recipe and us
 
 from scipy.optimize import linprog
 from dataclasses import dataclass
+from collections import defaultdict
 
 
 @dataclass
@@ -62,6 +63,14 @@ class Recipe:
 
     def get_item_count(self, item) -> int:
         return self.get_output_count(item) - self.get_input_count(item)
+
+
+@dataclass
+class OptimizerResult:
+    solvable: bool
+    recipe_count: dict[str, int]
+    produced: dict[str, int]
+    consumed: dict[str, int]
 
 
 recipes = {
@@ -89,11 +98,9 @@ def produce_required_items(
     maximize: list[str] = [],
     provide: dict[str, int] = {},
     limit: dict[str, int] = {},
-    optimize_for: list[str] = [],
     ignore: list[str] = [],
-):
+) -> OptimizerResult:
     maximize = set(maximize)
-    optimize_for = set(optimize_for)
     ignore = set(ignore)
 
     items = set()
@@ -173,7 +180,7 @@ def produce_required_items(
             item = list(used_recipes[recipe].inputs.keys())[0]
             if item in maximize:
                 c.append(-1)
-            elif item in ignore:
+            elif item in ignore or item in provide or item in limit:
                 c.append(0)
             else:
                 c.append(1)
@@ -185,8 +192,21 @@ def produce_required_items(
     result = linprog(c, A_eq=A_ub, b_eq=b_ub)
     print(result)
 
+    recipe_counts = {}
+    total_inputs = defaultdict(lambda: 0)
+    total_outputs = defaultdict(lambda: 0)
     if result.success:
         for recipe_count, (recipe_name, recipe) in zip(result.x, used_recipes.items()):
+            recipe_counts[recipe_name] = recipe_count
+
+            if recipe_name not in output_recipes:
+                for item, count in recipe.inputs.items():
+                    total_inputs[item] += count * recipe_count
+
+            if recipe_name not in pure_inputs:
+                for item, count in recipe.outputs.items():
+                    total_outputs[item] += count * recipe_count
+
             inputs = []
             for input_name, input_count in recipe.inputs.items():
                 inputs.append(f"{input_count * recipe_count:.1f} x {input_name}")
@@ -196,9 +216,16 @@ def produce_required_items(
             print(
                 f"{recipe_count:.1f} x {recipe_name}: {' + '.join(inputs)} --> {' + '.join(outputs)}"
             )
+
     else:
         print("Failed to optimize")
         print(result)
+    return OptimizerResult(
+        solvable=result.success,
+        recipe_count=recipe_counts,
+        consumed=total_inputs,
+        produced=total_outputs,
+    )
 
 
 produce_required_items(
