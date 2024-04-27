@@ -48,6 +48,10 @@ TODO: update this text with the output recipes. Generate an output recipe and us
 from scipy.optimize import linprog
 from dataclasses import dataclass
 from collections import defaultdict
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 
 @dataclass
@@ -159,7 +163,7 @@ def produce_required_items(
         for recipe in used_recipes.values():
             # Aub uses -rj_ti, because linprog needs <= instead of >=
             row.append(-recipe.get_item_count(item))
-        print(f"{item}: {row}")
+        logger.debug(f"{item}: {row}")
         A_ub.append(row)
 
     b_ub = list()
@@ -187,10 +191,10 @@ def produce_required_items(
         else:
             c.append(0)
 
-    print(b_ub)
-    print(c)
+    logger.debug(A_ub)
+    logger.debug(b_ub)
+    logger.debug(c)
     result = linprog(c, A_eq=A_ub, b_eq=b_ub)
-    print(result)
 
     recipe_counts = {}
     total_inputs = defaultdict(lambda: 0)
@@ -213,71 +217,16 @@ def produce_required_items(
             outputs = []
             for output_name, output_count in recipe.outputs.items():
                 outputs.append(f"{output_count * recipe_count:.1f} x {output_name}")
-            print(
+            logger.debug(
                 f"{recipe_count:.1f} x {recipe_name}: {' + '.join(inputs)} --> {' + '.join(outputs)}"
             )
 
     else:
-        print("Failed to optimize")
-        print(result)
+        logger.debug("Failed to optimize")
+        logger.debug(result)
     return OptimizerResult(
         solvable=result.success,
         recipe_count=recipe_counts,
         consumed=total_inputs,
         produced=total_outputs,
     )
-
-
-produce_required_items(
-    recipes={
-        "advanced-oil-processing": Recipe(
-            inputs={"crude-oil": 100, "water": 50},
-            outputs={"heavy-oil": 25, "light-oil": 45, "petroleum-gas": 55},
-        ),
-        "light-oil-cracking": Recipe(
-            inputs={"light-oil": 30, "water": 30}, outputs={"petroleum-gas": 20}
-        ),
-        "heavy-oil-cracking": Recipe(
-            inputs={"heavy-oil": 40, "water": 30}, outputs={"light-oil": 30}
-        ),
-    },
-    maximize=["petroleum-gas"],
-    limit={"water": 1000},
-)
-
-produce_required_items(
-    recipes={
-        "advanced-oil-processing": Recipe(
-            inputs={"crude-oil": 100, "water": 50},
-            outputs={"heavy-oil": 25, "light-oil": 45, "petroleum-gas": 55},
-        ),
-        "light-oil-cracking": Recipe(
-            inputs={"light-oil": 30, "water": 30}, outputs={"petroleum-gas": 20}
-        ),
-        "heavy-oil-cracking": Recipe(
-            inputs={"heavy-oil": 40, "water": 30}, outputs={"light-oil": 30}
-        ),
-    },
-    require={"petroleum-gas": 110},
-    ignore=["water"],
-)
-
-produce_required_items(
-    recipes={
-        "copper-smelting": Recipe(
-            inputs={"copper-ore": 1}, outputs={"copper-plate": 1}
-        ),
-        "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
-        "copper-wire-assembly": Recipe(
-            inputs={"copper-plate": 1}, outputs={"copper-wire": 2}
-        ),
-        "electronic-circuits-assembly": Recipe(
-            inputs={"iron-plate": 1, "copper-wire": 3},
-            outputs={"electronic-circuit": 1},
-        ),
-    },
-    provide={"iron-plate": 15, "copper-plate": 10},
-    limit={"iron-plate": 0},
-    maximize=["electronic-circuit"],
-    require={"gear": 2},
-)
