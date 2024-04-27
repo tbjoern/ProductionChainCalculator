@@ -77,25 +77,6 @@ class OptimizerResult:
     consumed: dict[str, int]
 
 
-recipes = {
-    # "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
-    # "copper-smelting": Recipe(inputs={"copper-ore": 1}, outputs={"copper-plate": 1}),
-    # "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
-    # "copper-wire-assembly": Recipe(inputs={"copper-plate": 1}, outputs={"copper-wire": 2}),
-    # "electronic-circuits-assembly": Recipe(inputs={"iron-plate": 1, "copper-wire": 3}, outputs={"electronic-circuit": 1}),
-    "advanced-oil-processing": Recipe(
-        inputs={"crude-oil": 100, "water": 50},
-        outputs={"heavy-oil": 25, "light-oil": 45, "petroleum-gas": 55},
-    ),
-    "light-oil-cracking": Recipe(
-        inputs={"light-oil": 30, "water": 30}, outputs={"petroleum-gas": 20}
-    ),
-    "heavy-oil-cracking": Recipe(
-        inputs={"heavy-oil": 40, "water": 30}, outputs={"light-oil": 30}
-    ),
-}
-
-
 def produce_required_items(
     recipes: dict[str, Recipe],
     require: dict[str, int] = {},
