@@ -121,14 +121,18 @@ def produce_required_items(
         for output in recipe.outputs:
             pure_inputs.discard(output)
 
+    input_recipes = set()
     for item in pure_inputs:
         # dont generate a pure input recipe for input-limited items
         if item in limit:
             continue
         input_recipe = Recipe(inputs={}, outputs={item: 1})
-        used_recipes[item] = input_recipe
+        used_recipes[f"source-{item}"] = input_recipe
+        input_recipes.add(f"source-{item}")
 
     # generate an output recipe for all outputs
+    # output recipes control optimization of byproducts
+    # see recipe_weights
     all_outputs = set()
     for recipe in used_recipes.values():
         for output in recipe.outputs:
@@ -140,60 +144,69 @@ def produce_required_items(
         used_recipes[f"sink-{output}"] = output_recipe
         output_recipes.add(f"sink-{output}")
 
-    A_ub = list()
+    # sums up the inputs + outputs of all recipes, by item
+    # cell i,j contains how many of item i recipe j consumes (negative) or produces (positive)
+    recipe_item_sums = list()
     for item in items:
         row = list()
         for recipe in used_recipes.values():
-            # Aub uses -rj_ti, because linprog needs <= instead of >=
-            row.append(-recipe.get_item_count(item))
+            row.append(recipe.get_item_count(item))
         logger.debug(f"{item}: {row}")
-        A_ub.append(row)
+        recipe_item_sums.append(row)
 
-    b_ub = list()
-
+    # positive: factory produces as intended output
+    # negative: factory can consume as input
+    # byproducts will be 'consumed' by an overflow output recipe
+    target_item_counts = list()
     for item in items:
         target_item_count = (
-            provide.get(item, 0) + limit.get(item, 0) - require.get(item, 0)
+            require.get(item, 0) - provide.get(item, 0) - limit.get(item, 0)
         )
-        b_ub.append(target_item_count)
+        target_item_counts.append(target_item_count)
 
     # objective coefficients
-    c = list()
+    recipe_weights = list()
     for recipe in used_recipes:
-        if recipe in pure_inputs:
-            if recipe in conserve:
-                c.append(1)
+        if recipe in input_recipes:
+            item = list(used_recipes[recipe].outputs.keys())[0]
+            if item in conserve:
+                # try to minimize input
+                recipe_weights.append(1)
             else:
-                # dont optimize for "pure input recipes" - take as many as is required
-                c.append(0)
+                # dont optimize - take as many as is required
+                recipe_weights.append(0)
         elif recipe in output_recipes:
             item = list(used_recipes[recipe].inputs.keys())[0]
             if item in maximize:
-                c.append(-1)
+                # enourage producing as much of this output as possible
+                recipe_weights.append(-1)
             elif item in ignore or item in provide or item in limit:
-                c.append(0)
+                # allow/ignore any overflow
+                recipe_weights.append(0)
             else:
-                c.append(1)
+                # try to mimize byproduct
+                recipe_weights.append(1)
         else:
-            c.append(0)
+            recipe_weights.append(0)
 
-    logger.debug(A_ub)
-    logger.debug(b_ub)
-    logger.debug(c)
-    result = linprog(c, A_eq=A_ub, b_eq=b_ub)
+    logger.debug(recipe_item_sums)
+    logger.debug(target_item_counts)
+    logger.debug(recipe_weights)
+    result = linprog(recipe_weights, A_eq=recipe_item_sums, b_eq=target_item_counts)
 
     recipe_counts = {}
     total_inputs = defaultdict(lambda: 0)
     total_outputs = defaultdict(lambda: 0)
     if result.success:
         for recipe_count, (recipe_name, recipe) in zip(result.x, used_recipes.items()):
-            recipe_counts[recipe_name] = recipe_count
+            if recipe_name not in output_recipes and recipe_name not in input_recipes:
+                recipe_counts[recipe_name] = recipe_count
 
             if recipe_name not in output_recipes:
                 for item, count in recipe.inputs.items():
                     total_inputs[item] += count * recipe_count
 
-            if recipe_name not in pure_inputs:
+            if recipe_name not in input_recipes:
                 for item, count in recipe.outputs.items():
                     total_outputs[item] += count * recipe_count
 
