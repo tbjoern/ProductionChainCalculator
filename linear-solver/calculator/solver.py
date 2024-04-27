@@ -58,7 +58,7 @@ logger.setLevel(logging.DEBUG)
 @dataclass
 class OptimizerResult:
     solvable: bool
-    recipe_count: dict[str, int]
+    recipe_count: dict[Recipe, int]
     produced: dict[str, int]
     consumed: dict[str, int]
 

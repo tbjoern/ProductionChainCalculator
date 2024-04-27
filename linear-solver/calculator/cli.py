@@ -123,6 +123,11 @@ if __name__ == "__main__":
                 for recipe in builder.all_recipes:
                     print(f"\t{recipe}")
             elif opcode == "optimize":
+                timespan = None
+                try:
+                    timespan = float(rest)
+                except:
+                    pass
                 result = builder.optimize()
                 if result.solvable:
                     print("Inputs:")
@@ -137,7 +142,22 @@ if __name__ == "__main__":
                             print(f"\t{item}: {count}")
                     print("Recipes:")
                     for recipe, count in result.recipe_count.items():
-                        print(f"\t{count} x {recipe}")
+                        time = recipe.extras.get("time")
+                        if (
+                            timespan is not None
+                            and time is not None
+                            and type(time) in {int, float}
+                        ):
+                            machine_count = count * time / timespan
+                            machine_label = (
+                                recipe.extras.get("factory")
+                                or recipe.extras.get("machine")
+                                or "machine"
+                            )
+
+                            print(f"\t{machine_count} x {machine_label}, {recipe}")
+                        else:
+                            print(f"\t{count} x {recipe}")
 
         except KeyboardInterrupt:
             break
