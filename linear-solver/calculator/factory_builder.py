@@ -30,6 +30,9 @@ class FactoryBuilder:
     def add_recipe(self, recipe: Recipe):
         self.used_recipes.add_recipe(recipe)
 
+    def is_using_recipe(self, recipe: Recipe):
+        return recipe in self.used_recipes.all()
+
     def find_producers_of(self, item: str) -> list[Recipe]:
         producers = []
         for recipe in self.all_recipes:
@@ -76,7 +79,9 @@ class FactoryBuilder:
 
         inputs = self.get_factory_inputs()
         for input in inputs:
-            new_recipes.update(self.produce_item_chain(input))
+            new_recipes.update(
+                self.produce_item_chain(input, resolve_multiple_producers)
+            )
         return new_recipes
 
     def get_factory_inputs(self) -> list[str]:

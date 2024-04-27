@@ -72,6 +72,29 @@ if __name__ == "__main__":
                     print(f"Item {item} is already beeing produced")
                 except NoProducers:
                     print(f"There are no recipes that produce {item}")
+            elif opcode == "add-recipe-for":
+                item = rest.strip()
+                recipes = list(
+                    filter(
+                        lambda recipe: not builder.is_using_recipe(recipe),
+                        builder.find_producers_of(item),
+                    )
+                )
+                if len(recipes) == 0:
+                    print("All available recipes in use")
+                else:
+                    print("Available recipes:")
+                    for i, recipe in enumerate(recipes):
+                        print(f"\t{i}: {recipe}")
+                    while True:
+                        choice = input("> ")
+                        try:
+                            recipe = recipes[int(choice)]
+                            break
+                        except:
+                            print("Invalid number, try again")
+                    builder.add_recipe(recipe)
+                    print(f"Added recipe {recipe}")
             elif opcode == "produce-chain":
                 item = rest.strip()
                 new_recipes = builder.produce_item_chain(
