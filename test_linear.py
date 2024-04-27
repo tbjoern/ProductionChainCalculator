@@ -214,11 +214,12 @@ def test_cycle():
                 inputs={"wood": 2, "water": 5}, outputs={"sapling": 1}
             ),
         },
-        require={"wood": 100},
+        require={"wood": 80},
     )
 
     assert result.solvable
+    assert result.recipe_count["grow-wood"] == 10
     assert result.consumed["wood"] > 0
-    assert result.produced["wood"] - result.consumed["wood"] == 100
+    assert result.produced["wood"] - result.consumed["wood"] == 80
     assert result.produced["sapling"] > 0
     assert result.produced["sapling"] - result.consumed["sapling"] == 0
