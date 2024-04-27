@@ -39,3 +39,21 @@
 24 construction-parts + 12 electronics --> 12 construction-parts-2 ; time: 60.0, factory: assembly-3
 
 
+# oil
+54 crude-oil + 6 steam-high --> 48 medium-oil + 6 heavy-oil + 18 sour-water ; time: 60, machine: distillation-stage-1
+48 medium-oil  + 3 steam-high -->  36 diesel + 12 light-oil ; time: 60, machine: distillation-stage-2
+12 light-oil + 3 steam-high --> 12 naphtha + 18 fuel-gas ; time: 60, machine: distillation-stage-3
+
+12 heavy-oil + 12 hydrogen --> 24 diesel + 6 fuel-gas ; time: 60, machine: cracking-unit
+12 heavy-oil + 12 hydrogen --> 18 naphtha + 12 fuel-gas ; time: 60, machine: cracking-unit
+
+18 naphtha + 12 hydrogen --> 24 diesel + 6 fuel-gas ; time: 60, machine: cracking-unit
+24 naphtha + 3 steam-high --> 30 fuel-gas + 6 sour-water ; time: 60, machine: cracking-unit
+
+36 fuel-gas + 18 oxygen --> 24 diesel + 6 water ; time: 60, machine: cracking-unit
+36 fuel-gas + 3 steam-high --> 42 hydrogen + 36 co2 ; time: 60, machine: hydrogen-reformer
+
+24 diesel + 3 steam-high --> 18 naphtha + 6 sour-water; time: 60, machine: cracking-unit
+
+24 water --> 24 steam-high ; time: 60, machine: boiler-electric
+
