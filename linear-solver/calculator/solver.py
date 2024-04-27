@@ -71,10 +71,12 @@ def produce_required_items(
     limit: dict[str, int] = {},
     ignore: list[str] = [],
     conserve: list[str] = [],
+    additional_inputs: list[str] = [],
 ) -> OptimizerResult:
     maximize = set(maximize)
     ignore = set(ignore)
     conserve = set(conserve)
+    additional_inputs = set(additional_inputs)
 
     items = set()
 
@@ -106,6 +108,8 @@ def produce_required_items(
     for recipe in used_recipes:
         for output in recipe.outputs:
             pure_inputs.discard(output)
+
+    pure_inputs = pure_inputs.union(additional_inputs)
 
     input_recipes = set()
     for item in pure_inputs:

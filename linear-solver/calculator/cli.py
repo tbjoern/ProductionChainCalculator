@@ -1,5 +1,5 @@
 from pathlib import Path
-from .recipe import parse_spec, parse_def
+from .recipe import parse_spec, parse_def, Recipe
 from .factory_builder import FactoryBuilder, AlreadyProduced, NoProducers
 import logging
 
@@ -9,17 +9,18 @@ logger.setLevel(logging.DEBUG)
 
 def resolve_multiple_producers(item, producers):
     print(f"Item {item} has multiple producers, choose one:")
-    for i, producer in enumerate(producers):
-        print(f"{i}: {str(producer)}")
+    return select_recipe(producers)
+
+
+def select_recipe(recipes: list[Recipe]) -> Recipe:
+    for i, recipe in enumerate(recipes):
+        print(f"{i}: {str(recipe)}")
     while True:
         choice = input("> ")
         try:
-            producer = producers[int(choice)]
-            break
+            return recipes[int(choice)]
         except:
             print("Invalid number, try again")
-
-    return producer
 
 
 if __name__ == "__main__":
@@ -61,6 +62,24 @@ if __name__ == "__main__":
             elif opcode == "remove":
                 item = rest.strip()
                 builder.remove_required_item(item)
+            elif opcode == "add-limit":
+                item, count = parse_def(rest)
+                builder.set_limit(item, count)
+            elif opcode == "remove-limit":
+                item = rest.strip()
+                builder.remove_limit(item)
+            elif opcode == "set-input":
+                item = rest.strip()
+                builder.set_explicit_input(item)
+            elif opcode == "remove-input":
+                item = rest.strip()
+                builder.remove_explicit_input(item)
+            elif opcode == "set-ignored":
+                item = rest.strip()
+                builder.set_ignored(item)
+            elif opcode == "remove-ignored":
+                item = rest.strip()
+                builder.remove_ignored(item)
             elif opcode == "produce":
                 item = rest.strip()
                 try:
@@ -84,15 +103,7 @@ if __name__ == "__main__":
                     print("All available recipes in use")
                 else:
                     print("Available recipes:")
-                    for i, recipe in enumerate(recipes):
-                        print(f"\t{i}: {recipe}")
-                    while True:
-                        choice = input("> ")
-                        try:
-                            recipe = recipes[int(choice)]
-                            break
-                        except:
-                            print("Invalid number, try again")
+                    recipe = select_recipe(recipes)
                     builder.add_recipe(recipe)
                     print(f"Added recipe {recipe}")
             elif opcode == "produce-chain":
@@ -122,6 +133,11 @@ if __name__ == "__main__":
                 print("All available recipes:")
                 for recipe in builder.all_recipes:
                     print(f"\t{recipe}")
+            elif opcode == "remove-recipe":
+                print("Select recipe to remove:")
+                recipe = select_recipe(builder.used_recipes.all())
+                builder.remove_recipe(recipe)
+                print(f"Removed recipe {recipe}")
             elif opcode == "optimize":
                 timespan = None
                 try:
@@ -158,6 +174,9 @@ if __name__ == "__main__":
                             print(f"\t{machine_count} x {machine_label}, {recipe}")
                         else:
                             print(f"\t{count} x {recipe}")
+                else:
+                    print("No solution :(")
+                    print(result)
 
         except KeyboardInterrupt:
             break

@@ -162,6 +162,9 @@ class RecipeBook:
     def add_recipe(self, recipe: Recipe):
         self.recipes.append(recipe)
 
+    def remove_recipe(self, recipe: Recipe):
+        self.recipes.remove(recipe)
+
     def get_outputs(self) -> list[str]:
         outputs = set()
         for recipe in self.recipes:
