@@ -125,3 +125,50 @@ def test_maximize_and_require():
     assert result.consumed["iron-plate"] == 6
     assert result.produced["gear"] == 3
     assert result.produced["iron-plate"] == 8
+
+
+def test_maximize_with_two_inputs():
+    recipes = {
+        "iron-smelting": Recipe(inputs={"iron-ore": 1}, outputs={"iron-plate": 1}),
+        "copper-smelting": Recipe(
+            inputs={"copper-ore": 1}, outputs={"copper-plate": 1}
+        ),
+        "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
+        "copper-wire-assembly": Recipe(
+            inputs={"copper-plate": 1}, outputs={"copper-wire": 2}
+        ),
+        "electronic-circuits-assembly": Recipe(
+            inputs={"iron-plate": 1, "copper-wire": 3},
+            outputs={"electronic-circuit": 1},
+        ),
+    }
+
+    result = produce_required_items(
+        recipes=recipes,
+        limit={"iron-ore": 15},
+        maximize=["electronic-circuit"],
+    )
+
+    assert result.solvable
+    assert result.produced["electronic-circuit"] == 15
+    for item, count in {
+        "iron-plate": 15,
+        "iron-ore": 15,
+        "copper-ore": 22.5,
+        "copper-plate": 22.5,
+        "copper-wire": 45,
+    }.items():
+        assert (
+            result.consumed[item] == count
+        ), f"{item}: {result.consumed[item]} != {count}"
+
+
+def test_maximize_unbounded():
+    result = produce_required_items(
+        recipes={
+            "gear-assembly": Recipe(inputs={"iron-plate": 2}, outputs={"gear": 1}),
+        },
+        maximize=["gear"],
+    )
+
+    assert not result.solvable
