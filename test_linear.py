@@ -172,3 +172,53 @@ def test_maximize_unbounded():
     )
 
     assert not result.solvable
+
+
+def test_conserve():
+    result = produce_required_items(
+        recipes={
+            "fuel-from-oil": Recipe(inputs={"oil": 1}, outputs={"fuel": 1}),
+            "fuel-from-fuel-gas": Recipe(inputs={"fuel-gas": 1}, outputs={"fuel": 1}),
+        },
+        require={"fuel": 1},
+        conserve=["oil"],
+    )
+
+    assert result.solvable
+    assert result.produced["fuel"] == 1
+    assert result.consumed["fuel-gas"] == 1
+    assert result.consumed["oil"] == 0
+
+    result = produce_required_items(
+        recipes={
+            "fuel-from-oil": Recipe(inputs={"oil": 1}, outputs={"fuel": 1}),
+            "fuel-from-fuel-gas": Recipe(inputs={"fuel-gas": 1}, outputs={"fuel": 1}),
+        },
+        require={"fuel": 1},
+        conserve=["fuel-gas"],
+    )
+
+    assert result.solvable
+    assert result.produced["fuel"] == 1
+    assert result.consumed["fuel-gas"] == 0
+    assert result.consumed["oil"] == 1
+
+
+def test_cycle():
+    result = produce_required_items(
+        recipes={
+            "grow-wood": Recipe(
+                inputs={"sapling": 1, "water": 10}, outputs={"wood": 10}
+            ),
+            "sapling-processing": Recipe(
+                inputs={"wood": 2, "water": 5}, outputs={"sapling": 1}
+            ),
+        },
+        require={"wood": 100},
+    )
+
+    assert result.solvable
+    assert result.consumed["wood"] > 0
+    assert result.produced["wood"] - result.consumed["wood"] == 100
+    assert result.produced["sapling"] > 0
+    assert result.produced["sapling"] - result.consumed["sapling"] == 0
