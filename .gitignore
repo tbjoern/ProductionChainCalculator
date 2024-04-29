@@ -1,3 +1,7 @@
 __pycache__
 .venv
 *.egg-info
+bootstrap.min.js
+bootstrap.min.js.map
+bootstrap.min.css
+bootstrap.min.css.map

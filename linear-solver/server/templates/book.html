@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}
+    <style>
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+    </style>
+    <title>{{book}}</title>
+{% endblock %}
+
+{% block content %}
+    <h3>{{book_name}}</h3>
+
+    <h4>Calculator</h4>
+
+    <details open>
+        <summary>Outputs</summary>
+        <div id="outputs" class="item-grid">
+            <button id="addOutputBtn" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addOutput">+</button>
+        </div>
+    </details>
+
+    <details>
+        <summary>Byproducts</summary>
+        <div id="byproducts" class="container">
+        </div>
+    </details>
+
+    <details open>
+        <summary>Inputs</summary>
+        <div id="inputs" class="container">
+        </div>
+    </details>
+
+    <h4>Recipes</h4>
+    <ul>
+        {% for recipe in book %}
+        <li>
+            {{recipe.serialized}}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Modal -->
+    <div class="modal fade" id="addOutput" tabindex="-1" aria-labelledby="addOutputLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h1 class="modal-title fs-5" id="addOutputLabel">Add Output</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="item-grid">
+                    {% for item in book.get_outputs() %}
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" onclick="addOutput('{{item}}')">{{item}}</button>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="test()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    function addOutput(name) {
+        let output = document.createElement("button");
+        output.innerText = name;
+        output.className = "btn btn-secondary";
+
+        document.getElementById("outputs").insertBefore(output, document.getElementById("addOutputBtn"));
+    }
+    function test() {
+        let outputSelector = document.getElementById("outputSelector");
+        console.log(outputSelector.value);
+        console.log("test");
+    }
+</script>
+{% endblock %}

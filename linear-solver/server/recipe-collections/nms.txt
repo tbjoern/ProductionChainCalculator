@@ -41,7 +41,7 @@
 250 sulphurine + 50 condensed carbon --> 1 thermic condensate ; factory: hand
 250 radon + 50 condensed carbon --> 1 enriched carbon ; factory: hand
 250 nitrogen + 50 condensed carbon --> 1 nitrogen salt ; factory: hand
-1 thermic condensate + 1 enriched carbon --> 1 organic catalyst ; factory: hand
+thermic condensate + 1 enriched carbon --> 1 organic catalyst ; factory: hand
 1 thermic condensate + 1 nitrogen salt --> 1 semiconductor ; factory: hand
 1 enriched carbon + 1 nitrogen salt --> 1 hot ice ; factory: hand
 1 organic catalyst + 1 nitrogen salt --> 1 fusion accelerant ; factory: hand
