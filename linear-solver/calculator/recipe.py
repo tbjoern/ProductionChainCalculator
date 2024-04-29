@@ -1,5 +1,6 @@
 from typing import TypeAlias, Any
 from dataclasses import dataclass, field
+import re
 import logging
 
 logger = logging.getLogger(__name__)
@@ -50,15 +51,24 @@ class Recipe:
         return self.get_output_count(item) - self.get_input_count(item)
 
 
+item_def_regex = re.compile(r"(?:([0-9]+)\s+)?(.*)")
+
+
+class ParseException(Exception):
+    pass
+
+
 def parse_def(item_def):
-    tokens = item_def.split()
-    if len(tokens) == 1:
-        name = tokens[0].strip()
-        count = 1
+    matches = item_def_regex.fullmatch(item_def.strip())
+    if matches is None:
+        raise ParseException()
+    groups = matches.groups()
+    count, name = groups
+    if count is None:
+        count = 1.0
     else:
-        count, name = tokens
-        count = float(count.strip())
-        name = name.strip()
+        count = float(count)
+    name = name.strip()
     return name, count
 
 
