@@ -66,6 +66,9 @@ class FactoryBuilder:
 
         return producers
 
+    def find_consumers_of(self, item: str) -> list[Recipe]:
+        return self.all_recipes.find_consumers_of(item)
+
     def produce_item(
         self,
         item: str,

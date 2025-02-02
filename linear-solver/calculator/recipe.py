@@ -153,6 +153,14 @@ class RecipeBook:
 
         return producers
 
+    def find_consumers_of(self, item) -> list[Recipe]:
+        consumers = []
+        for recipe in self.recipes:
+            if item in recipe.inputs:
+                consumers.append(recipe)
+
+        return consumers
+
     def get_all_items(self) -> set[str]:
         items = set()
         for recipe in self.recipes:

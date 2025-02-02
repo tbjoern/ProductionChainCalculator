@@ -177,6 +177,11 @@ if __name__ == "__main__":
                 else:
                     print("No solution :(")
                     print(result)
+            elif opcode == "used-in":
+                item = rest.strip()
+                consumers = builder.find_consumers_of(item)
+                for recipe in consumers:
+                    print(recipe)
 
         except KeyboardInterrupt:
             break
